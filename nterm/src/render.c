@@ -102,8 +102,10 @@ void ntermPutc(char c) {
         uint32_t *ptr = (uint32_t *)((uintptr_t)terminal.buffer + (terminal.y * terminal.lineSize));
         off_t offset = terminal.y * terminal.lineSize;
 
-        lseek(terminal.lfb, offset, SEEK_SET);
-        write(terminal.lfb, ptr, terminal.lineSize);
+        if(terminal.redraw) {
+            lseek(terminal.lfb, offset, SEEK_SET);
+            write(terminal.lfb, ptr, terminal.lineSize);
+        }
 
         terminal.x = 0;
         terminal.y++;
@@ -113,8 +115,11 @@ void ntermPutc(char c) {
         ptr = (uint32_t *)((uintptr_t)terminal.buffer + (terminal.y * terminal.lineSize));
         offset = terminal.y * terminal.lineSize;
 
-        lseek(terminal.lfb, offset, SEEK_SET);
-        write(terminal.lfb, ptr, terminal.lineSize);
+        if(terminal.redraw) {
+            lseek(terminal.lfb, offset, SEEK_SET);
+            write(terminal.lfb, ptr, terminal.lineSize);
+        }
+
         return;
     } else if(c == '\r') {      // carriage return
         ntermEraseCursor();
@@ -159,6 +164,34 @@ void ntermPutc(char c) {
 
     ntermDrawCursor();
 
+    if(terminal.redraw) {
+        lseek(terminal.lfb, offset, SEEK_SET);
+        write(terminal.lfb, ptr, terminal.lineSize);
+    }
+}
+
+/* ntermPutcn(): renders a string of n characters on the screen
+ * params: s - pointer to string
+ * params: n - number of characters to print
+ * returns: nothing
+ */
+
+void ntermPutcn(const char *s, size_t n) {
+    if(!n) return;
+
+    int start = terminal.y;
+
+    // only redraw once instead of redrawing after every character
+    terminal.redraw = 0;
+    for(size_t i = 0; i < n; i++) ntermPutc(s[i]);
+    int end = terminal.y;
+
+    int lines = end - start + 1;
+
+    terminal.redraw = 1;
+
+    uint32_t *ptr = (uint32_t *)((uintptr_t)terminal.buffer + (start * terminal.lineSize));
+    off_t offset = start * terminal.lineSize;
     lseek(terminal.lfb, offset, SEEK_SET);
-    write(terminal.lfb, ptr, terminal.lineSize);
+    write(terminal.lfb, ptr, terminal.lineSize * lines);
 }

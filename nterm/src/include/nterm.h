@@ -9,6 +9,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
 
 #define DEFAULT_SCANCODES       84      // count
 
@@ -30,6 +31,7 @@ typedef struct {
     int cursor;             // cursor visibility
     int echo;               // keypress echo
     uint32_t bg, fg;
+    int redraw;             // redraw enabled
 
     int keyCount;
     uint16_t scancodes[BUFFER_SIZE];    // keyboard scan codes
@@ -45,3 +47,4 @@ extern const char scancodesDefault[];
 extern const char scancodesDefualtShift[];
 
 void ntermPutc(char);
+void ntermPutcn(const char *, size_t);
