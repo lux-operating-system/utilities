@@ -49,6 +49,45 @@ int ntermCheckBoundaries() {
     return 0;
 }
 
+/* ntermDrawCursor(): draws the cursor on the frame buffer
+ * params: none
+ * returns: nothing
+ */
+
+void ntermDrawCursor() {
+    if(!terminal.cursor) return;
+
+    // get pixel offset
+    int x = terminal.x * 8;
+    int y = terminal.y * 16;
+    uint32_t *fb = (uint32_t *)((uintptr_t)terminal.buffer + (y * terminal.pitch) + (x * 4));
+
+    // I cursor
+    for(int i = 0; i < 16; i++) {
+        *fb = terminal.fg;
+        fb += terminal.width;
+    }
+}
+
+/* ntermEraseCursor(): erases the cursor from the frame buffer
+ * params: none
+ * returns: nothing
+ */
+
+void ntermEraseCursor() {
+    // get pixel offset
+    int x = terminal.x * 8;
+    int y = terminal.y * 16;
+    uint32_t *fb = (uint32_t *)((uintptr_t)terminal.buffer + (y * terminal.pitch) + (x * 4));
+
+    uint32_t color = fb[7];
+
+    for(int i = 0; i < 16; i++) {
+        *fb = color;
+        fb += terminal.width;
+    }
+}
+
 /* ntermPutc(): draws a character on the frame buffer
  * params: c - character to draw
  * returns: nothing
@@ -57,14 +96,22 @@ int ntermCheckBoundaries() {
 void ntermPutc(char c) {
     // check for special characters
     if(c == '\n') {             // new line
+        ntermEraseCursor();
         terminal.x = 0;
         terminal.y++;
         ntermCheckBoundaries();
         return;
     } else if(c == '\r') {      // carriage return
+        ntermEraseCursor();
         terminal.x = 0;
         return;
     }
+
+    if(c < FONT_MIN_GLYPH || c > FONT_MAX_GLYPH)
+        return ntermPutc('?');
+
+    // erase the old cursor
+    ntermEraseCursor();
 
     // get pixel offset
     int x = terminal.x * 8;
@@ -94,6 +141,8 @@ void ntermPutc(char c) {
     // and advance the cursor
     terminal.x++;
     if(ntermCheckBoundaries()) return;
+
+    ntermDrawCursor();
 
     lseek(terminal.lfb, offset, SEEK_SET);
     write(terminal.lfb, ptr, terminal.lineSize);
