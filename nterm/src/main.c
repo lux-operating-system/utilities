@@ -36,11 +36,18 @@ const uint32_t ttyColors[] = {
     0xE6E6E6        // bright white
 };
 
-int child(char *slavepty) {
+int child(char *slavepty, int maxfd) {
+    if(maxfd) {
+        for(int i = 0; i < maxfd; i++) close(i);
+    }
+
     // open the slave pty for stdin, out, err
     for(int i = 0; i < 3; i++) {
         if(open(slavepty, O_RDWR) < 0) return -1;
     }
+
+    // test program
+    execrdv("hello", NULL);
 
     while(1);
 }
@@ -99,7 +106,7 @@ int main(int argc, char **argv) {
     // fork and spawn a test process
     pid_t pid = fork();
     if(pid < 0) return -1;
-    if(!pid) return child(slaveName);
+    if(!pid) return child(slaveName, terminal.kbd);
 
     // idle loop where we read from the keyboard and write to the master pty,
     // and then read from the master pty and draw to the screen
@@ -123,6 +130,13 @@ int main(int argc, char **argv) {
 
             // and send the key presses to the terminal
             write(master, terminal.printableKeys, terminal.keyCount);
+        }
+
+        // read from the terminal to draw on the screen
+        s = read(master, terminal.slaveOutput, BUFFER_SIZE);
+        if(s > 0 && s <= BUFFER_SIZE) {
+            terminal.slaveCount = s;
+            for(int i = 0; i < s; i++) ntermPutc(terminal.slaveOutput[i]);
         }
     }
 }
