@@ -97,9 +97,24 @@ void ntermPutc(char c) {
     // check for special characters
     if(c == '\n') {             // new line
         ntermEraseCursor();
+
+        // update the frame buffer of the erased cursor
+        uint32_t *ptr = (uint32_t *)((uintptr_t)terminal.buffer + (terminal.y * terminal.lineSize));
+        off_t offset = terminal.y * terminal.lineSize;
+
+        lseek(terminal.lfb, offset, SEEK_SET);
+        write(terminal.lfb, ptr, terminal.lineSize);
+
         terminal.x = 0;
         terminal.y++;
         ntermCheckBoundaries();
+        ntermDrawCursor();
+
+        ptr = (uint32_t *)((uintptr_t)terminal.buffer + (terminal.y * terminal.lineSize));
+        offset = terminal.y * terminal.lineSize;
+
+        lseek(terminal.lfb, offset, SEEK_SET);
+        write(terminal.lfb, ptr, terminal.lineSize);
         return;
     } else if(c == '\r') {      // carriage return
         ntermEraseCursor();

@@ -39,7 +39,7 @@ const uint32_t ttyColors[] = {
 int child(char *slavepty) {
     // open the slave pty for stdin, out, err
     for(int i = 0; i < 3; i++) {
-        if(open(slavepty, O_RDWR) < 0) exit(-1);
+        if(open(slavepty, O_RDWR) < 0) return -1;
     }
 
     while(1);
@@ -59,12 +59,11 @@ int main(int argc, char **argv) {
     if(!tempSlave) return -1;
     char *slaveName = malloc(strlen(tempSlave) + 1);
     if(!slaveName) return -1;
-
     strcpy(slaveName, tempSlave);
 
     // open the frame buffer and keyboard
     terminal.lfb = open("/dev/lfb0", O_RDWR | O_CLOEXEC);
-    terminal.kbd = open("/dev/kbd", O_RDONLY | O_CLOEXEC);
+    terminal.kbd = open("/dev/kbd", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
     if(terminal.lfb < 0 || terminal.kbd < 0) return -1;
 
     // get the screen resolution
@@ -81,6 +80,8 @@ int main(int argc, char **argv) {
     terminal.echo = 1;
     terminal.bg = ttyColors[0];
     terminal.fg = ttyColors[7];
+    terminal.keyCount = 0;
+    terminal.slaveCount = 0;
 
     terminal.wchar = terminal.width / 8;
     terminal.hchar = terminal.height / 8;
@@ -94,14 +95,34 @@ int main(int argc, char **argv) {
         terminal.buffer[i] = ttyColors[0];
 
     write(terminal.lfb, terminal.buffer, terminal.pixelCount * 4);
-    ntermPutc('A');
-    ntermPutc('B');
-    while(1);
 
     // fork and spawn a test process
     pid_t pid = fork();
     if(pid < 0) return -1;
     if(!pid) return child(slaveName);
 
-    while(1);
+    // idle loop where we read from the keyboard and write to the master pty,
+    // and then read from the master pty and draw to the screen
+    for(;;) {
+        // read from the keyboard
+        ssize_t s = read(terminal.kbd, terminal.scancodes, BUFFER_SIZE*2);
+        if(s > 0 && s <= BUFFER_SIZE) {
+            size_t events = s/2;
+
+            // only save the key presses, not the key ups
+            terminal.keyCount = 0;
+            for(int i = 0; i < events; i++) {
+                if(!(terminal.scancodes[i] & 0x8000) && (terminal.scancodes[i] < DEFAULT_SCANCODES)) {
+                    terminal.printableKeys[terminal.keyCount] = scancodesDefault[terminal.scancodes[i]];
+                    if(terminal.echo && terminal.printableKeys[terminal.keyCount])
+                        ntermPutc(terminal.printableKeys[terminal.keyCount]);
+
+                    terminal.keyCount++;
+                }
+            }
+
+            // and send the key presses to the terminal
+            write(master, terminal.printableKeys, terminal.keyCount);
+        }
+    }
 }
