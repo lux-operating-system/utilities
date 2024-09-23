@@ -95,6 +95,7 @@ int main(int argc, char **argv) {
 
     write(terminal.lfb, terminal.buffer, terminal.pixelCount * 4);
     ntermPutc('A');
+    ntermPutc('B');
     while(1);
 
     // fork and spawn a test process

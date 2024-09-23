@@ -12,10 +12,10 @@
 
 /* ntermCheckBoundaries(): checks the boundaries and scrolls if necessary
  * params: none
- * returns: nothing
+ * returns: 1 if scrolled, zero if not
  */
 
-void ntermCheckBoundaries() {
+int ntermCheckBoundaries() {
     if(terminal.x >= terminal.wchar) {
         terminal.x = 0;
         terminal.y++;
@@ -39,11 +39,14 @@ void ntermCheckBoundaries() {
 
         terminal.x = 0;
         terminal.y = terminal.hchar - 1;
+
+        // and update the entire screen
+        lseek(terminal.lfb, 0, SEEK_SET);
+        write(terminal.lfb, terminal.buffer, terminal.totalSize);
+        return 1;
     }
 
-    // and update the entire screen
-    lseek(terminal.lfb, 0, SEEK_SET);
-    write(terminal.lfb, terminal.buffer, terminal.totalSize);
+    return 0;
 }
 
 /* ntermPutc(): draws a character on the frame buffer
@@ -87,6 +90,11 @@ void ntermPutc(char c) {
     // and update the frame buffer
     uint32_t *ptr = (uint32_t *)((uintptr_t)terminal.buffer + (y * terminal.pitch));
     off_t offset = y * terminal.pitch;
+
+    // and advance the cursor
+    terminal.x++;
+    if(ntermCheckBoundaries()) return;
+
     lseek(terminal.lfb, offset, SEEK_SET);
     write(terminal.lfb, ptr, terminal.lineSize);
 }
