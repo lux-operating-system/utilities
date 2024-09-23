@@ -10,6 +10,8 @@
 
 #include <stdint.h>
 
+#define DEFAULT_SCANCODES       84      // count
+
 #define FONT_MIN_GLYPH          32      // ' '
 #define FONT_MAX_GLYPH          126     // '~'
 
@@ -30,5 +32,7 @@ typedef struct {
 
 extern TerminalStatus terminal;
 extern const uint8_t font[];
+extern const char scancodesDefault[];
+extern const char scancodesDefualtShift[];
 
 void ntermPutc(char);
