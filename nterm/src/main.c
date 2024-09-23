@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
     // this is the first non-server process to run on lux
     // we need to set up stdio for all children processes
     // start by creating a terminal
-    int master = posix_openpt(O_RDWR | O_CLOEXEC);
+    int master = posix_openpt(O_RDWR | O_NONBLOCK | O_CLOEXEC);
     if(master < 0) return -1;
 
     grantpt(master);
@@ -89,6 +89,7 @@ int main(int argc, char **argv) {
     terminal.fg = ttyColors[7];
     terminal.keyCount = 0;
     terminal.slaveCount = 0;
+    terminal.redraw = 1;
 
     terminal.wchar = terminal.width / 8;
     terminal.hchar = terminal.height / 8;
@@ -136,7 +137,7 @@ int main(int argc, char **argv) {
         s = read(master, terminal.slaveOutput, BUFFER_SIZE);
         if(s > 0 && s <= BUFFER_SIZE) {
             terminal.slaveCount = s;
-            for(int i = 0; i < s; i++) ntermPutc(terminal.slaveOutput[i]);
+            ntermPutcn((const char *)terminal.slaveOutput, terminal.slaveCount);
         }
     }
 }
