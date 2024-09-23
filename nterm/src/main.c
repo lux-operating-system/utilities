@@ -74,6 +74,13 @@ int main(int argc, char **argv) {
     if(ioctl(terminal.lfb, LFB_GET_HEIGHT, &temp)) return -1;
     terminal.height = temp;
     terminal.pixelCount = terminal.width * terminal.height;
+    terminal.pitch = terminal.width * 4;
+    terminal.lineSize = terminal.pitch * 16;
+    terminal.totalSize = terminal.lineSize * terminal.height;
+    terminal.cursor = 1;
+    terminal.echo = 1;
+    terminal.bg = ttyColors[0];
+    terminal.fg = ttyColors[7];
 
     terminal.wchar = terminal.width / 8;
     terminal.hchar = terminal.height / 8;
@@ -87,6 +94,7 @@ int main(int argc, char **argv) {
         terminal.buffer[i] = ttyColors[0];
 
     write(terminal.lfb, terminal.buffer, terminal.pixelCount * 4);
+    ntermPutc('A');
     while(1);
 
     // fork and spawn a test process
