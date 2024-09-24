@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
     for(;;) {
         // read from the keyboard
         ssize_t s = read(terminal.kbd, terminal.scancodes, BUFFER_SIZE*2);
-        if(s > 0 && s <= BUFFER_SIZE) {
+        if(s >= 2 && s <= BUFFER_SIZE) {
             size_t events = s/2;
 
             // only save the key presses, not the key ups
