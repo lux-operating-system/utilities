@@ -14,6 +14,7 @@
 #include <sys/lux/lux.h>
 #include <liblux/lfb.h>
 #include <nterm.h>
+#include <stdio.h>
 
 TerminalStatus terminal;
 
@@ -36,7 +37,7 @@ const uint32_t ttyColors[] = {
     0xE6E6E6        // bright white
 };
 
-int child(char *slavepty, int maxfd) {
+int child(char *slavepty, int maxfd, int argc, char **argv) {
     if(maxfd) {
         for(int i = 0; i < maxfd; i++) close(i);
     }
@@ -46,8 +47,8 @@ int child(char *slavepty, int maxfd) {
         if(open(slavepty, O_RDWR) < 0) return -1;
     }
 
-    // test program
-    execrdv("hello", NULL);
+    if(argc >= 2)
+        execvp(argv[1], &argv[1]);
 
     while(1);
 }
@@ -107,7 +108,7 @@ int main(int argc, char **argv) {
     // fork and spawn a test process
     pid_t pid = fork();
     if(pid < 0) return -1;
-    if(!pid) return child(slaveName, terminal.kbd);
+    if(!pid) return child(slaveName, terminal.kbd, argc, argv);
 
     // idle loop where we read from the keyboard and write to the master pty,
     // and then read from the master pty and draw to the screen
