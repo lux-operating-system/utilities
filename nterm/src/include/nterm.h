@@ -16,7 +16,7 @@
 #define FONT_MIN_GLYPH          32      // ' '
 #define FONT_MAX_GLYPH          126     // '~'
 
-#define BUFFER_SIZE             64
+#define BUFFER_SIZE             1024
 
 typedef struct {
     int width, height;      // pixels
@@ -32,6 +32,8 @@ typedef struct {
     int echo;               // keypress echo
     uint32_t bg, fg;
     int redraw;             // redraw enabled
+
+    int cbreak;             // input buffering mode, default is 0 (nocbreak)
 
     int keyCount;
     uint16_t scancodes[BUFFER_SIZE];    // keyboard scan codes

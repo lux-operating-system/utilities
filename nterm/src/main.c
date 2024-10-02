@@ -57,6 +57,8 @@ int main(int argc, char **argv) {
     // this is the first non-server process to run on lux
     // we need to set up stdio for all children processes
     // start by creating a terminal
+    memset(&terminal, 0, sizeof(TerminalStatus));
+
     int master = posix_openpt(O_RDWR | O_NONBLOCK | O_CLOEXEC);
     if(master < 0) return -1;
 
@@ -117,21 +119,27 @@ int main(int argc, char **argv) {
         ssize_t s = read(terminal.kbd, terminal.scancodes, BUFFER_SIZE*2);
         if(s >= 2 && s <= BUFFER_SIZE) {
             size_t events = s/2;
+            int ret = 0;        // return key press
 
             // only save the key presses, not the key ups
-            terminal.keyCount = 0;
             for(int i = 0; i < events; i++) {
                 if(!(terminal.scancodes[i] & 0x8000) && (terminal.scancodes[i] < DEFAULT_SCANCODES)) {
                     terminal.printableKeys[terminal.keyCount] = scancodesDefault[terminal.scancodes[i]];
-                    if(terminal.echo && terminal.printableKeys[terminal.keyCount])
+                    if(terminal.echo && terminal.printableKeys[terminal.keyCount]) {
                         ntermPutc(terminal.printableKeys[terminal.keyCount]);
+                        if(terminal.printableKeys[terminal.keyCount] == '\n') ret = 1;
+                    }
 
                     terminal.keyCount++;
                 }
             }
 
-            // and send the key presses to the terminal
-            write(master, terminal.printableKeys, terminal.keyCount);
+            // send the key presses to the terminal if we're in cbreak mode OR
+            // if the user pressed enter
+            if(terminal.cbreak || ret) {
+                write(master, terminal.printableKeys, terminal.keyCount);
+                terminal.keyCount = 0;
+            }
         }
 
         // read from the terminal to draw on the screen
