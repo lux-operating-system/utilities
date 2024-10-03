@@ -34,6 +34,10 @@ typedef struct {
     int redraw;             // redraw enabled
 
     int cbreak;             // input buffering mode, default is 0 (nocbreak)
+    int escaping;           // 1 if parsing escape sequence
+
+    uint8_t escape[256];    // escape sequence buffer
+    int escapeLen;          // length of escape sequence
 
     int keyCount;
     uint16_t scancodes[BUFFER_SIZE];    // keyboard scan codes
@@ -47,6 +51,8 @@ extern TerminalStatus terminal;
 extern const uint8_t font[];
 extern const char scancodesDefault[];
 extern const char scancodesDefaultShift[];
+extern const uint32_t ttyColors[];
 
 void ntermPutc(char);
 void ntermPutcn(const char *, size_t);
+void parseEscape();

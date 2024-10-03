@@ -95,7 +95,14 @@ void ntermEraseCursor() {
 
 void ntermPutc(char c) {
     // check for special characters
-    if(c == '\n') {             // new line
+    if(c == '\e') {
+        terminal.escaping = 1;
+        memset(terminal.escape, 0, 256);
+        terminal.escape[0] = '\e';
+        terminal.escapeLen = 1;
+        
+        return;
+    } else if(c == '\n') {             // new line
         ntermEraseCursor();
 
         // update the frame buffer of the erased cursor
@@ -141,6 +148,18 @@ void ntermPutc(char c) {
         if(terminal.redraw) {
             lseek(terminal.lfb, offset, SEEK_SET);
             write(terminal.lfb, ptr, terminal.lineSize);
+        }
+
+        return;
+    }
+
+    if(terminal.escaping) {
+        terminal.escape[terminal.escapeLen] = c;
+        terminal.escapeLen++;
+
+        if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+            terminal.escaping = 0;
+            parseEscape();
         }
 
         return;
