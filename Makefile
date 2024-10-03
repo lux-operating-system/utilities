@@ -5,6 +5,8 @@ all:
 	@make -C nterm
 	@echo "\x1B[0;1;35m make\x1B[0m utilities/lush"
 	@make -C lush
+	@echo "\x1B[0;1;35m make\x1B[0m utilities/echo"
+	@make -C echo
 
 install:
 	@mkdir -p out
@@ -14,6 +16,8 @@ install:
 	@make install -C nterm
 	@echo "\x1B[0;1;35m make\x1B[0m install utilities/lush"
 	@make install -C lush
+	@echo "\x1B[0;1;35m make\x1B[0m install utilities/echo"
+	@make install -C echo
 
 clean:
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/hello"
@@ -22,3 +26,5 @@ clean:
 	@make clean -C nterm
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/lush"
 	@make clean -C lush
+	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/echo"
+	@make clean -C echo
