@@ -48,10 +48,17 @@ int child(char *slavepty, int maxfd, int argc, char **argv) {
         if(open(slavepty, O_RDWR) < 0) return -1;
     }
 
-    if(argc >= 2)
-        execvp(argv[1], &argv[1]);
+    if(argc >= 2) {
+        execvp(argv[1], &argv[1]);  // execute the second argument by default
+        fprintf(stderr, "nterm: could not execute %s, trying lush...\n", argv[1]);
+    }
+    
+    // if that doesn't work, execute the default shell
+    char *args[] = { "lush", NULL };
+    execvp("lush", args);
+    fprintf(stderr, "nterm: could not execute lush, aborting...\n");
 
-    while(1);
+    exit(-1);
 }
 
 int main(int argc, char **argv) {
