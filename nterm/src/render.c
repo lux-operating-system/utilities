@@ -125,6 +125,25 @@ void ntermPutc(char c) {
         ntermEraseCursor();
         terminal.x = 0;
         return;
+    } else if(c == '\b') {      // backspace
+        if(!terminal.x) return;
+
+        ntermEraseCursor();
+        terminal.x--;
+        ntermPutc(' ');
+        ntermEraseCursor();
+        terminal.x--;
+        ntermDrawCursor();
+
+        uint32_t *ptr = (uint32_t *)((uintptr_t)terminal.buffer + (terminal.y * terminal.lineSize));
+        off_t offset = terminal.y * terminal.lineSize;
+
+        if(terminal.redraw) {
+            lseek(terminal.lfb, offset, SEEK_SET);
+            write(terminal.lfb, ptr, terminal.lineSize);
+        }
+
+        return;
     }
 
     if(c < FONT_MIN_GLYPH || c > FONT_MAX_GLYPH)

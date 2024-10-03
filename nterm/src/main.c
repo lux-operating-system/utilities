@@ -127,10 +127,20 @@ int main(int argc, char **argv) {
                     terminal.printableKeys[terminal.keyCount] = scancodesDefault[terminal.scancodes[i]];
                     if(terminal.echo && terminal.printableKeys[terminal.keyCount]) {
                         ntermPutc(terminal.printableKeys[terminal.keyCount]);
-                        if(terminal.printableKeys[terminal.keyCount] == '\n') ret = 1;
                     }
 
-                    terminal.keyCount++;
+                    // handling for enter
+                    if(terminal.printableKeys[terminal.keyCount] == '\n') ret = 1;
+
+                    // handling for backspace if not in cbreak mode
+                    if(terminal.printableKeys[terminal.keyCount] == '\b') {
+                        if((!terminal.cbreak) && (terminal.keyCount > 0)) {
+                            terminal.keyCount--;
+                            terminal.printableKeys[terminal.keyCount] = 0;
+                        }
+                    } else {
+                        terminal.keyCount++;
+                    }
                 }
             }
 
