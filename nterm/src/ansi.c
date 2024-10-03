@@ -6,19 +6,19 @@
  * and /dev/kbd as input
  */
 
+/* Implementation of ANSI Control Sequences */
+
 #include <nterm.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
 
 void parseCSI() {
-    // check what command this is
     uint8_t *seq = (uint8_t *) terminal.escape;
     char *token;
 
     switch(seq[terminal.escapeLen-1]) {
-    case 'm':
-        // set colors/font attributes
+    case 'm':       // set rendering attributes
         seq += 2;   // skip to first attribute
         token = strtok((char *) seq, ";");
         while(token) {
@@ -43,9 +43,25 @@ void parseCSI() {
     }
 }
 
+void parseVT220() {
+    uint8_t *seq = (uint8_t *) terminal.escape;
+
+    switch(seq[terminal.escapeLen-1]) {
+    case 'h':       // enable cursor/focus
+        int n = atoi((const char *) seq+2);
+        if(n == 25) terminal.cursor = 1;
+        break;
+
+    case 'l':       // disable cursor/focus
+        int n = atoi((const char *) seq+2);
+        if(n == 25) terminal.cursor = 0;
+        break;
+    }
+}
+
 void parseEscape() {
     switch(terminal.escape[1]) {
-    case '[':   // CSI
-        return parseCSI();
+    case '[': return parseCSI();
+    case '?': return parseVT220();
     }
 }
