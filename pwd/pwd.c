@@ -11,6 +11,6 @@
 
 int main(void) {
     char path[PATH_MAX];
-    sprintf("%s\n", getwd(path));
+    printf("%s\n", getwd(path));
     return 0;
 }
