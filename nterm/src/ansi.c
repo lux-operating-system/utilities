@@ -17,12 +17,14 @@ void parseCSI() {
     uint8_t *seq = (uint8_t *) terminal.escape;
     char *token;
 
+    int n;
+
     switch(seq[terminal.escapeLen-1]) {
     case 'm':       // set rendering attributes
         seq += 2;   // skip to first attribute
         token = strtok((char *) seq, ";");
         while(token) {
-            int n = atoi(token);
+            n = atoi(token);
             if(!n) {
                 terminal.bg = ttyColors[0];
                 terminal.fg = ttyColors[7];
@@ -34,6 +36,10 @@ void parseCSI() {
                 terminal.fg = ttyColors[n - 83];    // bright
             } else if(n >= 100 && n <= 107) {
                 terminal.bg = ttyColors[n - 93];
+            } else if(n == 39) {    // default foreground
+                terminal.fg = ttyColors[7];
+            } else if(n == 49) {    // default background
+                terminal.bg = ttyColors[0];
             }
 
             token = strtok(NULL, ";");
@@ -45,15 +51,16 @@ void parseCSI() {
 
 void parseVT220() {
     uint8_t *seq = (uint8_t *) terminal.escape;
+    int n;
 
     switch(seq[terminal.escapeLen-1]) {
     case 'h':       // enable cursor/focus
-        int n = atoi((const char *) seq+2);
+        n = atoi((const char *) seq+2);
         if(n == 25) terminal.cursor = 1;
         break;
 
     case 'l':       // disable cursor/focus
-        int n = atoi((const char *) seq+2);
+        n = atoi((const char *) seq+2);
         if(n == 25) terminal.cursor = 0;
         break;
     }
