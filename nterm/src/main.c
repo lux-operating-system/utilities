@@ -130,9 +130,11 @@ int main(int argc, char **argv) {
             for(int i = 0; i < events; i++) {
                 if((terminal.scancodes[i] == KBD_KEY_LEFT_SHIFT) || (terminal.scancodes[i] == KBD_KEY_RIGHT_SHIFT)) {
                     shift = 1;
+                    continue;
                 } else if((terminal.scancodes[i] == (KBD_KEY_LEFT_SHIFT | KBD_KEY_RELEASE)) ||
                     (terminal.scancodes[i] == (KBD_KEY_RIGHT_SHIFT | KBD_KEY_RELEASE))) {
                     shift = 0;
+                    continue;
                 }
 
                 if(shift) scancodeLookup = (char *) scancodesDefaultShift;
