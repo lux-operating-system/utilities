@@ -49,7 +49,18 @@ int execute(char *program) {
     argv[argc] = NULL;  // null terminate
 
     // check for built-in commands
-    if(!strcmp(argv[0], "cd")) {
+    if(!strcmp(argv[0], "exit")) {
+        int status = 0;
+        if(argc >= 2) status = atoi(argv[1]);
+        fprintf(stderr, "exit");
+        exit(status);
+    } else if(!strcmp(argv[0], "cd")) {
+        if(argc != 2) {
+            // TODO: this should redirect to HOME someday
+            fprintf(stderr, "usage: cd directory_name\n");
+            return -1;
+        }
+
         if(chdir(argv[1])) {
             fprintf(stderr, "lush: cannot cd into %s\n", argv[1]);
             return -1;
@@ -84,7 +95,6 @@ int execute(char *program) {
         // parent
         int status;
         if(waitpid(pid, &status, 0) != pid) return -1;
-
         if(WIFEXITED(status)) return WEXITSTATUS(status);
     }
 
@@ -98,7 +108,7 @@ int main() {
     if(!uid) {
         printf("logged in as root on %s\n\n", ttyname(0));
     } else {
-        printf("logged in as uid %d\n\n", uid);
+        printf("logged in as uid %d on %s\n\n", uid, ttyname(0));
     }
 
     char *line = NULL;
