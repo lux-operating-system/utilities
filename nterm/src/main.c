@@ -13,6 +13,7 @@
 #include <sys/ioctl.h>
 #include <sys/lux/lux.h>
 #include <liblux/lfb.h>
+#include <liblux/kbd.h>
 #include <nterm.h>
 #include <stdio.h>
 
@@ -112,6 +113,8 @@ int main(int argc, char **argv) {
     if(pid < 0) return -1;
     if(!pid) return child(slaveName, terminal.kbd, argc, argv);
 
+    int shift = 0;
+
     // idle loop where we read from the keyboard and write to the master pty,
     // and then read from the master pty and draw to the screen
     for(;;) {
@@ -122,9 +125,21 @@ int main(int argc, char **argv) {
             int ret = 0;        // return key press
 
             // only save the key presses, not the key ups
+            char *scancodeLookup;
+
             for(int i = 0; i < events; i++) {
+                if((terminal.scancodes[i] == KBD_KEY_LEFT_SHIFT) || (terminal.scancodes[i] == KBD_KEY_RIGHT_SHIFT)) {
+                    shift = 1;
+                } else if((terminal.scancodes[i] == (KBD_KEY_LEFT_SHIFT | KBD_KEY_RELEASE)) ||
+                    (terminal.scancodes[i] == (KBD_KEY_RIGHT_SHIFT | KBD_KEY_RELEASE))) {
+                    shift = 0;
+                }
+
+                if(shift) scancodeLookup = (char *) scancodesDefaultShift;
+                else scancodeLookup = (char *) scancodesDefault;
+
                 if(!(terminal.scancodes[i] & 0x8000) && (terminal.scancodes[i] < DEFAULT_SCANCODES)) {
-                    terminal.printableKeys[terminal.keyCount] = scancodesDefault[terminal.scancodes[i]];
+                    terminal.printableKeys[terminal.keyCount] = scancodeLookup[terminal.scancodes[i]];
                     if(terminal.echo && terminal.printableKeys[terminal.keyCount]) {
                         ntermPutc(terminal.printableKeys[terminal.keyCount]);
                     }

@@ -46,7 +46,7 @@ typedef struct {
 extern TerminalStatus terminal;
 extern const uint8_t font[];
 extern const char scancodesDefault[];
-extern const char scancodesDefualtShift[];
+extern const char scancodesDefaultShift[];
 
 void ntermPutc(char);
 void ntermPutcn(const char *, size_t);
