@@ -39,7 +39,7 @@ const uint32_t ttyColors[] = {
 
 int child(char *slavepty, int maxfd, int argc, char **argv) {
     if(maxfd) {
-        for(int i = 0; i < maxfd; i++) close(i);
+        for(int i = 0; i <= maxfd; i++) close(i);
     }
 
     // open the slave pty for stdin, out, err
