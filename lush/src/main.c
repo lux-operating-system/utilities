@@ -12,6 +12,7 @@
 #include <limits.h>
 #include <errno.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 uid_t uid;
 char wd[PATH_MAX];
@@ -79,10 +80,13 @@ int execute(char *program) {
         }
 
         exit(-1);
-    }
+    } else {
+        // parent
+        int status;
+        if(waitpid(pid, &status, 0) != pid) return -1;
 
-    // TODO: remove this hang after implementing waitpid()
-    while(1);
+        if(WIFEXITED(status)) return WEXITSTATUS(status);
+    }
 
     return 0;
 }
@@ -105,10 +109,11 @@ int main() {
         if(line) free(line);
 
         line = NULL;
+        lineSize = 4096;
+
         getline(&line, &lineSize, stdin);
-        
         execute(line);
     }
 
-    while(1);
+    return 0;
 }
