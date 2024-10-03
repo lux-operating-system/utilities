@@ -7,6 +7,8 @@ all:
 	@make -C lush
 	@echo "\x1B[0;1;35m make\x1B[0m utilities/echo"
 	@make -C echo
+	@echo "\x1B[0;1;35m make\x1B[0m utilities/pwd"
+	@make -C pwd
 
 install:
 	@mkdir -p out
@@ -18,6 +20,8 @@ install:
 	@make install -C lush
 	@echo "\x1B[0;1;35m make\x1B[0m install utilities/echo"
 	@make install -C echo
+	@echo "\x1B[0;1;35m make\x1B[0m install utilities/pwd"
+	@make install -C pwd
 
 clean:
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/hello"
@@ -28,3 +32,5 @@ clean:
 	@make clean -C lush
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/echo"
 	@make clean -C echo
+	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/pwd"
+	@make clean -C pwd
