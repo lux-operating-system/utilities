@@ -67,9 +67,6 @@ int execute(char *program) {
         }
 
         return 0;
-    } else if(!strcmp(argv[0], "pwd")) {
-        printf("%s\n", getwd(wd));
-        return 0;
     }
 
     pid_t pid = fork();
