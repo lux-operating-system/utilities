@@ -2,7 +2,7 @@
  * luxOS - a unix-like operating system
  * Omar Elghoul, 2024
  * 
- * echo: implementation of the pwd command
+ * pwd: implementation of the pwd command
  */
 
 #include <stdio.h>
