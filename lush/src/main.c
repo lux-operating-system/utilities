@@ -112,6 +112,7 @@ int main() {
         lineSize = 4096;
 
         getline(&line, &lineSize, stdin);
+        if(!line || !strlen(line)) continue;
         execute(line);
     }
 
