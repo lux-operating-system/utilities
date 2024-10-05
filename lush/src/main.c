@@ -101,7 +101,6 @@ int execute(char *program) {
 int main() {
     uid = getuid();
 
-    printf("lux shell\n");
     if(!uid) {
         printf("logged in as root on %s\n\n", ttyname(0));
     } else {
@@ -110,9 +109,10 @@ int main() {
 
     char *line = NULL;
     size_t lineSize = 4096;     // arbitrary limit for now
+    char promptColor = '2';     // green by default
 
     for(;;) {
-        printf("%s %c ", getwd(wd), uid ? '$' : '#');
+        printf("\e[0;96m%s \e[0;9%cm%c\e[0m ", getwd(wd), promptColor, uid ? '$' : '#');
         if(line) free(line);
 
         line = NULL;
@@ -120,7 +120,8 @@ int main() {
 
         getline(&line, &lineSize, stdin);
         if(!line || !strlen(line)) continue;
-        execute(line);
+        if(execute(line)) promptColor = '1';    // red on error
+        else promptColor = '2';     // green by default
     }
 
     return 0;
