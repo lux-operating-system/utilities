@@ -33,9 +33,9 @@ void parseCSI() {
             } else if(n >= 40 && n <= 47) {
                 terminal.bg = ttyColors[n - 40];
             } else if(n >= 90 && n <= 97) {
-                terminal.fg = ttyColors[n - 83];    // bright
+                terminal.fg = ttyColors[n - 82];    // bright
             } else if(n >= 100 && n <= 107) {
-                terminal.bg = ttyColors[n - 93];
+                terminal.bg = ttyColors[n - 92];
             } else if(n == 39) {    // default foreground
                 terminal.fg = ttyColors[7];
             } else if(n == 49) {    // default background
