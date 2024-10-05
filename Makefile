@@ -22,6 +22,8 @@ install:
 	@make install -C echo
 	@echo "\x1B[0;1;35m make\x1B[0m install utilities/pwd"
 	@make install -C pwd
+	@echo "\x1B[0;1;35m make\x1B[0m install utilities/ls"
+	@make install -C ls
 
 clean:
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/hello"
@@ -34,3 +36,5 @@ clean:
 	@make clean -C echo
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/pwd"
 	@make clean -C pwd
+	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/ls"
+	@make clean -C ls
