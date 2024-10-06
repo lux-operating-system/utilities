@@ -112,6 +112,9 @@ int main() {
         printf("logged in as uid %d on %s\n\n", uid, ttyname(0));
     }
 
+    // set shell name
+    setenv("SHELL", "lush", 1);
+
     char *line = NULL;
     size_t lineSize = 4096;     // arbitrary limit for now
     char promptColor = '2';     // green by default
