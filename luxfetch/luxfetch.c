@@ -57,12 +57,44 @@ int main(void) {
         return -1;
     }
 
-    // read uptime
     fclose(f);
+
+    // get CPU model
+    f = fopen("/proc/cpu", "r");
+    if(!f) {
+        fprintf(stderr, "unable to open /proc/cpu for reading\n");
+        free(kernel);
+        return -1;
+    }
+
+    fseek(f, 0, SEEK_END);
+    size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    char *cpu = calloc(1, size+1);
+    if(!cpu) {
+        fprintf(stderr, "failed to allocate memory\n");
+        free(kernel);
+        fclose(f);
+        return -1;
+    }
+
+    if(fread(cpu, 1, size, f) != size) {
+        fprintf(stderr, "failed to read from /proc/cpu\n");
+        free(kernel);
+        free(cpu);
+        fclose(f);
+        return -1;
+    }
+
+    fclose(f);
+
+    // read uptime
     f = fopen("/proc/uptime", "r");
     if(!f) {
         fprintf(stderr, "unable to open /proc/uptime for reading\n");
         free(kernel);
+        free(cpu);
         return -1;
     }
 
@@ -77,6 +109,7 @@ int main(void) {
     if(!f) {
         fprintf(stderr, "unable to open /proc/memsize for reading\n");
         free(kernel);
+        free(cpu);
         return -1;
     }
 
@@ -87,6 +120,7 @@ int main(void) {
     if(!f) {
         fprintf(stderr, "unable to open /proc/memusage for reading\n");
         free(kernel);
+        free(cpu);
         return -1;
     }
 
@@ -98,6 +132,7 @@ int main(void) {
     int fd = open("/dev/lfb0", O_RDONLY);
     if(fd < 0) {
         free(kernel);
+        free(cpu);
         fprintf(stderr, "unable to open /dev/lfb0 for reading\n");
         return -1;
     }
@@ -105,6 +140,7 @@ int main(void) {
     if(ioctl(fd, LFB_GET_WIDTH, &width)) {
         close(fd);
         free(kernel);
+        free(cpu);
         fprintf(stderr, "unable to get screen resolution\n");
         return -1;
     }
@@ -112,6 +148,7 @@ int main(void) {
     if(ioctl(fd, LFB_GET_HEIGHT, &height)) {
         close(fd);
         free(kernel);
+        free(cpu);
         fprintf(stderr, "unable to get screen resolution\n");
         return -1;
     }
@@ -126,11 +163,11 @@ int main(void) {
     int usageMB = memusage / 256;
     int sizeMB = memsize / 256;
 
-    printf(COLOR "          @@@@@@@@         %s" RESET "@" COLOR "localhost" RESET "\n", "root");
-    printf(COLOR "        @@@      @@@       " RESET "--------------\n");
-    printf(COLOR "      @@            @@     OS: " RESET "luxOS development\n");
-    printf(COLOR "     @@              @@    Kernel: " RESET "%s\n", kernel);
-    printf(COLOR "     @@              @@    Uptime: " RESET);
+    printf(COLOR "          @@@@@@@@          %s" RESET "@" COLOR "localhost" RESET "\n", "root");
+    printf(COLOR "        @@@      @@@        " RESET "--------------\n");
+    printf(COLOR "      @@            @@      OS: " RESET "luxOS development\n");
+    printf(COLOR "     @@              @@     Kernel: " RESET "%s\n", kernel);
+    printf(COLOR "     @@              @@     Uptime: " RESET);
 
     if(hours) {
         printf("%d hours, %d mins, %d mins\n", hours, mins, secs);
@@ -140,14 +177,14 @@ int main(void) {
         printf("%d secs\n", secs);
     }
 
-    printf(COLOR "     @@              @@    Shell: " RESET "%s\n", getenv("SHELL"));
-    printf(COLOR "     @@              @@    Resolution: " RESET "%dx%d\n", (int) width, (int) height);
-    printf(COLOR "      @@            @@     Terminal: " RESET "%s\n", ttyname(0));
-    printf(COLOR "       @@@        @@@      CPU: " RESET "\n");
-    printf(COLOR "         @@@    @@@        Memory: " RESET "%d MiB / %d MiB\n", usageMB, sizeMB);
-    printf(COLOR "          @@@@@@@@         " RESET "\n");
-    printf(COLOR "                           " RESET "%s\n", colorTest(0));
-    printf(COLOR "          @@@@@@@@         " RESET "%s\n", colorTest(1));
+    printf(COLOR "     @@              @@     Shell: " RESET "%s\n", getenv("SHELL"));
+    printf(COLOR "     @@              @@     Resolution: " RESET "%dx%d\n", (int) width, (int) height);
+    printf(COLOR "      @@            @@      Terminal: " RESET "%s\n", ttyname(0));
+    printf(COLOR "       @@@        @@@       CPU: " RESET "%s\n", cpu);
+    printf(COLOR "         @@@    @@@         Memory: " RESET "%d MiB / %d MiB\n", usageMB, sizeMB);
+    printf(COLOR "          @@@@@@@@          " RESET "\n");
+    printf(COLOR "                            " RESET "%s\n", colorTest(0));
+    printf(COLOR "          @@@@@@@@          " RESET "%s\n", colorTest(1));
     printf("\n");
 
     return 0;
