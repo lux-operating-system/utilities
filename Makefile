@@ -9,6 +9,10 @@ all:
 	@make -C echo
 	@echo "\x1B[0;1;35m make\x1B[0m utilities/pwd"
 	@make -C pwd
+	@echo "\x1B[0;1;35m make\x1B[0m utilities/ls"
+	@make -C ls
+	@echo "\x1B[0;1;35m make\x1B[0m utilities/cat"
+	@make -C cat
 
 install:
 	@mkdir -p out
@@ -24,6 +28,8 @@ install:
 	@make install -C pwd
 	@echo "\x1B[0;1;35m make\x1B[0m install utilities/ls"
 	@make install -C ls
+	@echo "\x1B[0;1;35m make\x1B[0m install utilities/cat"
+	@make install -C cat
 
 clean:
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/hello"
@@ -38,3 +44,5 @@ clean:
 	@make clean -C pwd
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/ls"
 	@make clean -C ls
+	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/cat"
+	@make clean -C cat
