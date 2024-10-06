@@ -13,6 +13,8 @@ all:
 	@make -C ls
 	@echo "\x1B[0;1;35m make\x1B[0m utilities/cat"
 	@make -C cat
+	@echo "\x1B[0;1;35m make\x1B[0m utilities/luxfetch"
+	@make -C luxfetch
 
 install:
 	@mkdir -p out
@@ -30,6 +32,8 @@ install:
 	@make install -C ls
 	@echo "\x1B[0;1;35m make\x1B[0m install utilities/cat"
 	@make install -C cat
+	@echo "\x1B[0;1;35m make\x1B[0m install utilities/luxfetch"
+	@make install -C luxfetch
 
 clean:
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/hello"
@@ -46,3 +50,5 @@ clean:
 	@make clean -C ls
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/cat"
 	@make clean -C cat
+	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/luxfetch"
+	@make clean -C luxfetch
