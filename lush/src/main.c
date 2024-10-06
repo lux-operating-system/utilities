@@ -40,6 +40,11 @@ int execute(char *program) {
         argc++;
     }
 
+    if(!argc) {
+        free(argv);
+        return 0;
+    }
+
     argv = realloc(argv, (argc+1) * sizeof(char *));
     if(!argv) {
         fprintf(stderr, "unable to allocate memory for program arguments\n");
