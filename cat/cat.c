@@ -23,19 +23,11 @@ int cat(FILE *input) {
 
     while(!feof(input)) {
         if(!u && (input != stdin)) {
-            value = fgetc(input);
-            if(value == EOF) {
-                errors++;
-            } else {
-                buffer[bufferCount] = value;
-                bufferCount++;
-            }
+            bufferCount = fread(buffer, 1, DEFAULT_BUFFER, input);
+            if(bufferCount == 0) errors++;
+            else if(fwrite(buffer, 1, bufferCount, stdout) != bufferCount) errors++;
 
-            if(bufferCount >= DEFAULT_BUFFER) {
-                if(fwrite(buffer, 1, bufferCount, stdout) != bufferCount) errors++;
-
-                bufferCount = 0;
-            }
+            bufferCount = 0;
         } else {
             value = fgetc(input);
             if(value == EOF) errors++;
