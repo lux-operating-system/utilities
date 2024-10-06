@@ -22,7 +22,7 @@ int cat(FILE *input) {
     int value;
 
     while(!feof(input)) {
-        if(!u && (input != stdin)) {
+        if(!u) {
             bufferCount = fread(buffer, 1, DEFAULT_BUFFER, input);
             if(bufferCount == 0) errors++;
             else if(fwrite(buffer, 1, bufferCount, stdout) != bufferCount) errors++;
