@@ -14,7 +14,7 @@ all: cat
 
 cat: $(OBJ)
 	@echo "\x1B[0;1;93m ld  \x1B[0m cat"
-	@$(LD) $(OBJ) -o ls $(LDFLAGS)
+	@$(LD) $(OBJ) -o cat $(LDFLAGS)
 
 install: cat
 	@cp cat ../out/
