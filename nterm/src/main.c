@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
     terminal.pixelCount = terminal.width * terminal.height;
     terminal.pitch = terminal.width * 4;
     terminal.lineSize = terminal.pitch * 16;
-    terminal.totalSize = terminal.lineSize * terminal.height;
+    terminal.totalSize = terminal.pitch * terminal.height;
     terminal.cursor = 1;
     terminal.echo = 1;
     terminal.bg = ttyColors[0];
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
     terminal.redraw = 1;
 
     terminal.wchar = terminal.width / 8;
-    terminal.hchar = terminal.height / 8;
+    terminal.hchar = terminal.height / 16;
     terminal.x = 0;
     terminal.y = 0;
     terminal.buffer = malloc(terminal.pixelCount * 4);
