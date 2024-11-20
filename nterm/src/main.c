@@ -150,7 +150,10 @@ int main(int argc, char **argv) {
                 if(!(terminal.scancodes[i] & 0x8000) && (terminal.scancodes[i] < DEFAULT_SCANCODES)) {
                     terminal.printableKeys[terminal.keyCount] = scancodeLookup[terminal.scancodes[i]];
                     if(terminal.echo && terminal.printableKeys[terminal.keyCount]) {
-                        ntermPutc(terminal.printableKeys[terminal.keyCount]);
+                        if(terminal.printableKeys[terminal.keyCount] != '\b')
+                            ntermPutc(terminal.printableKeys[terminal.keyCount]);
+                        else if(terminal.keyCount)
+                            ntermPutc('\b');
                     }
 
                     // handling for enter
