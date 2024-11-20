@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <errno.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -98,12 +99,15 @@ int execute(char *program) {
         int status;
         if(waitpid(pid, &status, 0) != pid) return -1;
         if(WIFEXITED(status)) return WEXITSTATUS(status);
+        else return -1;
     }
 
     return 0;
 }
 
 int main() {
+    signal(SIGINT, SIG_IGN);
+
     uid = getuid();
 
     if(!uid) {
