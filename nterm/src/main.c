@@ -16,6 +16,8 @@
 #include <liblux/kbd.h>
 #include <nterm.h>
 #include <stdio.h>
+#include <ctype.h>
+#include <signal.h>
 
 TerminalStatus terminal;
 
@@ -120,7 +122,7 @@ int main(int argc, char **argv) {
     if(pid < 0) return -1;
     if(!pid) return child(slaveName, terminal.kbd, argc, argv);
 
-    int shift = 0;
+    int shift = 0, control = 0;
 
     // idle loop where we read from the keyboard and write to the master pty,
     // and then read from the master pty and draw to the screen
@@ -142,6 +144,13 @@ int main(int argc, char **argv) {
                     (terminal.scancodes[i] == (KBD_KEY_RIGHT_SHIFT | KBD_KEY_RELEASE))) {
                     shift = 0;
                     continue;
+                } else if((terminal.scancodes[i] == KBD_KEY_LEFT_CTRL || (terminal.scancodes[i] == KBD_RIGHT_CTRL))) {
+                    control = 1;
+                    continue;
+                } else if((terminal.scancodes[i] == (KBD_KEY_LEFT_CTRL | KBD_KEY_RELEASE)) ||
+                    (terminal.scancodes[i] == (KBD_RIGHT_CTRL | KBD_KEY_RELEASE))) {
+                    control = 0;
+                    continue;
                 }
 
                 if(shift) scancodeLookup = (char *) scancodesDefaultShift;
@@ -150,23 +159,32 @@ int main(int argc, char **argv) {
                 if(!(terminal.scancodes[i] & 0x8000) && (terminal.scancodes[i] < DEFAULT_SCANCODES)) {
                     terminal.printableKeys[terminal.keyCount] = scancodeLookup[terminal.scancodes[i]];
                     if(terminal.echo && terminal.printableKeys[terminal.keyCount]) {
-                        if(terminal.printableKeys[terminal.keyCount] != '\b')
+                        if(control) {
+                            /* signals */
+                            char c = terminal.printableKeys[terminal.keyCount];
+                            if(c == 'c' || c == 'C') {
+                                /* send SIGINT to all children processes */
+                                kill(-1*pid, SIGINT);
+                            }
+                        } else if(terminal.printableKeys[terminal.keyCount] != '\b')
                             ntermPutc(terminal.printableKeys[terminal.keyCount]);
                         else if(terminal.keyCount)
                             ntermPutc('\b');
                     }
 
-                    // handling for enter
-                    if(terminal.printableKeys[terminal.keyCount] == '\n') ret = 1;
+                    if(!control) {
+                        // handling for enter
+                        if(terminal.printableKeys[terminal.keyCount] == '\n') ret = 1;
 
-                    // handling for backspace if not in cbreak mode
-                    if(terminal.printableKeys[terminal.keyCount] == '\b') {
-                        if((!terminal.cbreak) && (terminal.keyCount > 0)) {
-                            terminal.keyCount--;
-                            terminal.printableKeys[terminal.keyCount] = 0;
+                        // handling for backspace if not in cbreak mode
+                        if(terminal.printableKeys[terminal.keyCount] == '\b') {
+                            if((!terminal.cbreak) && (terminal.keyCount > 0)) {
+                                terminal.keyCount--;
+                                terminal.printableKeys[terminal.keyCount] = 0;
+                            }
+                        } else {
+                            terminal.keyCount++;
                         }
-                    } else {
-                        terminal.keyCount++;
                     }
                 }
             }
