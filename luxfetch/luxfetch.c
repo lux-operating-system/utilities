@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <fnctl.h>
+#include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/lux/lux.h>
 
