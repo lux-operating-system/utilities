@@ -77,7 +77,7 @@ int execute(char *program) {
 
     pid_t pid = fork();
     if(pid < 0) {
-        fprintf(stderr, "failed to fork() new program\n");
+        perror("lush");
         return -1;
     }
 
@@ -85,13 +85,10 @@ int execute(char *program) {
         execvp(argv[0], argv);
 
         // if we're here then the program failed to execute
-        if(errno == ENOENT) {
+        if(errno == ENOENT)
             fprintf(stderr, "lush: command not found: %s\n", argv[0]);
-        } else if(errno == ENOMEM) {
-            fprintf(stderr, "lush: out of memory\n");
-        } else {
-            fprintf(stderr, "lush: failed to exec: errno = %d\n", errno);
-        }
+        else
+            perror("lush");
 
         exit(-1);
     } else {
