@@ -11,6 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <sys/mman.h>
 #include <sys/lux/lux.h>
 #include <liblux/lfb.h>
 #include <liblux/kbd.h>
@@ -93,7 +94,8 @@ int main(int argc, char **argv) {
     if(ioctl(terminal.lfb, LFB_GET_HEIGHT, &temp)) return -1;
     terminal.height = temp;
     terminal.pixelCount = terminal.width * terminal.height;
-    terminal.pitch = terminal.width * 4;
+    if(ioctl(terminal.lfb, LFB_GET_PITCH, &temp)) return -1;
+    terminal.pitch = temp;
     terminal.lineSize = terminal.pitch * 16;
     terminal.totalSize = terminal.pitch * terminal.height;
     terminal.cursor = 1;
@@ -108,14 +110,17 @@ int main(int argc, char **argv) {
     terminal.hchar = terminal.height / 16;
     terminal.x = 0;
     terminal.y = 0;
-    terminal.buffer = malloc(terminal.pixelCount * 4);
+    terminal.buffer = malloc(terminal.totalSize);
     if(!terminal.buffer) return -1;
+    terminal.frame = mmap(NULL, terminal.totalSize, PROT_READ | PROT_WRITE, MAP_SHARED, terminal.lfb, 0);
+    if(terminal.frame == MAP_FAILED) return -1;
 
     // clear the screen
-    for(int i = 0; i < terminal.width*terminal.height; i++)
+    for(int i = 0; i < terminal.totalSize/4; i++)
         terminal.buffer[i] = ttyColors[0];
 
-    write(terminal.lfb, terminal.buffer, terminal.pixelCount * 4);
+    for(int i = 0; i < terminal.hchar; i++)
+        ntermRedrawLine(i);
 
     // fork and spawn a test process
     pid_t pid = fork();

@@ -23,7 +23,8 @@ typedef struct {
     int wchar, hchar;       // characters
     int x, y;               // cursor position
     int pitch;
-    uint32_t *buffer;       // frame buffer
+    uint32_t *buffer;       // back buffer
+    uint32_t *frame;        // front frame buffer
     int lfb, kbd;           // file descriptors
     int pixelCount;
     int lineSize;           // bytes
@@ -56,3 +57,4 @@ extern const uint32_t ttyColors[];
 void ntermPutc(char);
 void ntermPutcn(const char *, size_t);
 void parseEscape();
+void ntermRedrawLine(int);

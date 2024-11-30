@@ -10,6 +10,17 @@
 #include <unistd.h>
 #include <string.h>
 
+/* ntermRedrawLine(): redraws one horizontal line
+ * params: l - line to redraw
+ * returns: nothing
+ */
+
+void ntermRedrawLine(int l) {
+    uint32_t *back = ((uint32_t *)((uintptr_t)terminal.buffer + (l * 16 * terminal.pitch)));
+    uint32_t *front = ((uint32_t *)((uintptr_t)terminal.frame + (l * 16 * terminal.pitch)));
+    memcpy(front, back, terminal.lineSize);
+}
+
 /* ntermDrawCursor(): draws the cursor on the frame buffer
  * params: none
  * returns: nothing
