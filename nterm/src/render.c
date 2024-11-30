@@ -32,7 +32,7 @@ void ntermDrawCursor() {
     // get pixel offset
     int x = terminal.x * 8;
     int y = terminal.y * 16;
-    uint32_t *fb = (uint32_t *)((uintptr_t)terminal.buffer + (y * terminal.pitch) + (x * 4));
+    uint32_t *fb = (uint32_t *)((uintptr_t)terminal.frame + (y * terminal.pitch) + (x * 4));
 
     // I cursor
     for(int i = 0; i < 16; i++) {
@@ -71,11 +71,9 @@ int ntermCheckBoundaries() {
         terminal.x = 0;
         terminal.y = terminal.hchar - 1;
 
-        if(terminal.cursor) ntermDrawCursor();
+        memcpy(terminal.frame, terminal.buffer, terminal.totalSize);
 
-        // and update the entire screen
-        lseek(terminal.lfb, 0, SEEK_SET);
-        write(terminal.lfb, terminal.buffer, terminal.totalSize);
+        if(terminal.cursor) ntermDrawCursor();
         return 1;
     }
 
@@ -88,17 +86,7 @@ int ntermCheckBoundaries() {
  */
 
 void ntermEraseCursor() {
-    // get pixel offset
-    int x = terminal.x * 8;
-    int y = terminal.y * 16;
-    uint32_t *fb = (uint32_t *)((uintptr_t)terminal.buffer + (y * terminal.pitch) + (x * 4));
-
-    uint32_t color = fb[7];
-
-    for(int i = 0; i < 16; i++) {
-        *fb = color;
-        fb += terminal.width;
-    }
+    ntermRedrawLine(terminal.y);
 }
 
 /* ntermPutc(): draws a character on the frame buffer
@@ -118,51 +106,25 @@ void ntermPutc(char c) {
     } else if(c == '\n') {             // new line
         ntermEraseCursor();
 
-        // update the frame buffer of the erased cursor
-        uint32_t *ptr = (uint32_t *)((uintptr_t)terminal.buffer + (terminal.y * terminal.lineSize));
-        off_t offset = terminal.y * terminal.lineSize;
-
-        if(terminal.redraw) {
-            lseek(terminal.lfb, offset, SEEK_SET);
-            write(terminal.lfb, ptr, terminal.lineSize);
-        }
-
         terminal.x = 0;
         terminal.y++;
         if(ntermCheckBoundaries()) return;
 
         ntermDrawCursor();
-
-        ptr = (uint32_t *)((uintptr_t)terminal.buffer + (terminal.y * terminal.lineSize));
-        offset = terminal.y * terminal.lineSize;
-
-        if(terminal.redraw) {
-            lseek(terminal.lfb, offset, SEEK_SET);
-            write(terminal.lfb, ptr, terminal.lineSize);
-        }
-
         return;
     } else if(c == '\r') {      // carriage return
         ntermEraseCursor();
         terminal.x = 0;
+        ntermDrawCursor();
         return;
     } else if(c == '\b') {      // backspace
         if(!terminal.x) return;
 
-        ntermEraseCursor();
         terminal.x--;
         ntermPutc(' ');
-        ntermEraseCursor();
         terminal.x--;
+        ntermEraseCursor();
         ntermDrawCursor();
-
-        uint32_t *ptr = (uint32_t *)((uintptr_t)terminal.buffer + (terminal.y * terminal.lineSize));
-        off_t offset = terminal.y * terminal.lineSize;
-
-        if(terminal.redraw) {
-            lseek(terminal.lfb, offset, SEEK_SET);
-            write(terminal.lfb, ptr, terminal.lineSize);
-        }
 
         return;
     }
@@ -183,12 +145,13 @@ void ntermPutc(char c) {
         return ntermPutc('?');
 
     // erase the old cursor
-    ntermEraseCursor();
+    //ntermEraseCursor();
 
     // get pixel offset
     int x = terminal.x * 8;
     int y = terminal.y * 16;
-    uint32_t *fb = (uint32_t *)((uintptr_t)terminal.buffer + (y * terminal.pitch) + (x * 4));
+    uint32_t *back = (uint32_t *)((uintptr_t)terminal.buffer + (y * terminal.pitch) + (x * 4));
+    uint32_t *front = (uint32_t *)((uintptr_t)terminal.frame + (y * terminal.pitch) + (x * 4));
 
     // font data
     const uint8_t *data = &font[(c - FONT_MIN_GLYPH)*16];
@@ -197,29 +160,24 @@ void ntermPutc(char c) {
         uint8_t b = data[i];
 
         for(int j = 0; j < 8; j++) {
-            if(b & 0x80) fb[j] = terminal.fg;
-            else fb[j] = terminal.bg;
+            if(b & 0x80) back[j] = terminal.fg;
+            else back[j] = terminal.bg;
 
+            front[j] = back[j];
             b <<= 1;
         }
 
-        fb = (uint32_t *)((uintptr_t)fb + terminal.pitch);
+        back = (uint32_t *)((uintptr_t)back + terminal.pitch);
+        front = (uint32_t *)((uintptr_t)front + terminal.pitch);
     }
 
-    // and update the frame buffer
-    uint32_t *ptr = (uint32_t *)((uintptr_t)terminal.buffer + (y * terminal.pitch));
-    off_t offset = y * terminal.pitch;
+    //ntermRedrawLine(terminal.y);
 
     // and advance the cursor
     terminal.x++;
     if(ntermCheckBoundaries()) return;
 
     ntermDrawCursor();
-
-    if(terminal.redraw) {
-        lseek(terminal.lfb, offset, SEEK_SET);
-        write(terminal.lfb, ptr, terminal.lineSize);
-    }
 }
 
 /* ntermPutcn(): renders a string of n characters on the screen
@@ -231,19 +189,6 @@ void ntermPutc(char c) {
 void ntermPutcn(const char *s, size_t n) {
     if(!n) return;
 
-    int start = terminal.y;
-
-    // only redraw once instead of redrawing after every character
-    terminal.redraw = 0;
-    for(size_t i = 0; i < n; i++) ntermPutc(s[i]);
-    int end = terminal.y;
-
-    int lines = end - start + 1;
-
-    terminal.redraw = 1;
-
-    uint32_t *ptr = (uint32_t *)((uintptr_t)terminal.buffer + (start * terminal.lineSize));
-    off_t offset = start * terminal.lineSize;
-    lseek(terminal.lfb, offset, SEEK_SET);
-    write(terminal.lfb, ptr, terminal.lineSize * lines);
+    for(size_t i = 0; i < n; i++)
+        ntermPutc(s[i]);
 }

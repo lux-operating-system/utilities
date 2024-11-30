@@ -32,7 +32,6 @@ typedef struct {
     int cursor;             // cursor visibility
     int echo;               // keypress echo
     uint32_t bg, fg;
-    int redraw;             // redraw enabled
 
     int cbreak;             // input buffering mode, default is 0 (nocbreak)
     int escaping;           // 1 if parsing escape sequence

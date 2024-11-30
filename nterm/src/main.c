@@ -104,7 +104,6 @@ int main(int argc, char **argv) {
     terminal.fg = ttyColors[7];
     terminal.keyCount = 0;
     terminal.slaveCount = 0;
-    terminal.redraw = 1;
 
     terminal.wchar = terminal.width / 8;
     terminal.hchar = terminal.height / 16;
