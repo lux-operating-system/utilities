@@ -21,9 +21,11 @@ int head(FILE *input) {
     line = NULL;
     size_t lineSize = 4096;
 
+    totalLines = 0;
     while(totalLines < n) {
         getline(&line, &lineSize, input);
         if(!line) {
+            perror("head");
             errors++;
         } else {
             printf("%s", line);
@@ -48,7 +50,7 @@ int main(int argc, char **argv) {
                 return -1;
             }
         } else if(opt == ':') {
-            fprintf(stderr, "%s: option -%c requires an operand\n", argv[0], optopt);
+            fprintf(stderr, "%s: option requires an operand -- %c\n", argv[0], optopt);
             return -1;
         } else {
             fprintf(stderr, "%s: invalid option -- %c\n", argv[0], optopt);
@@ -59,9 +61,16 @@ int main(int argc, char **argv) {
 
     int retval = 0;
     FILE *input;
+    int currentFile = 0;
+    int fileCount = argc - optind;
 
     if(optind < argc) {
         for(int i = optind; i < argc; i++) {
+            if(fileCount > 1) {
+                if(currentFile) printf("\n==> %s <==\n", argv[i]);
+                else printf("==> %s <==\n", argv[i]);
+            }
+
             input = fopen(argv[i], "r");
             if(!input) {
                 fprintf(stderr, "%s: cannot open %s for reading\n", argv[0], argv[i]);
@@ -70,6 +79,7 @@ int main(int argc, char **argv) {
             }
 
             retval += head(input);
+            currentFile++;
         }
     } else {
         input = stdin;
