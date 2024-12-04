@@ -17,6 +17,8 @@ all:
 	@make -C luxfetch
 	@echo "\x1B[0;1;35m make\x1B[0m utilities/libctests"
 	@make -C libctests
+	@echo "\x1B[0;1;35m make\x1B[0m utilities/head"
+	@make -C head
 
 install:
 	@mkdir -p out
@@ -38,6 +40,8 @@ install:
 	@make install -C luxfetch
 	@echo "\x1B[0;1;35m make\x1B[0m install utilities/libctests"
 	@make install -C libctests
+	@echo "\x1B[0;1;35m make\x1B[0m install utilities/head"
+	@make install -C head
 
 clean:
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/hello"
@@ -58,3 +62,5 @@ clean:
 	@make clean -C luxfetch
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/libctests"
 	@make clean -C libctests
+	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/head"
+	@make clean -C head
