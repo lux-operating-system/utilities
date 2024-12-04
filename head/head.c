@@ -43,6 +43,10 @@ int main(int argc, char **argv) {
     while((opt = getopt(argc, argv, "n:")) != -1) {
         if(opt == 'n') {
             n = atoi(optarg);
+            if(n < 1) {
+                fprintf(stderr, "%s: invalid line count -- %d\n", argv[0], n);
+                return -1;
+            }
         } else if(opt == ':') {
             fprintf(stderr, "%s: option -%c requires an operand\n", argv[0], optopt);
             return -1;
