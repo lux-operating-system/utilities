@@ -14,7 +14,7 @@
 #include <stdlib.h>
 
 void parseCSI() {
-    uint8_t *seq = (uint8_t *) terminal.escape;
+    char *seq = (char *) terminal.escape;
     char *token;
 
     int n;
@@ -87,6 +87,34 @@ void parseCSI() {
             ntermDrawCursor();
         }
 
+        break;
+    
+    case 'H':       // move cursor
+        seq += 2;
+        int x = 0, y = 0;
+        ntermEraseCursor();
+
+        token = strtok((char *) seq, ";");
+        if(!token) {
+            x = 0;
+            if(seq[0] >= '0' && seq[0] <= '9') y = atoi(seq) - 1;
+            else y = 0;
+        } else {
+            y = atoi(token) - 1;
+            token = strtok(NULL, ";");
+            if(!token || !strlen(token)) y = 0;
+            else x = atoi(token) - 1;
+        }
+
+        if(y >= terminal.hchar) y = terminal.hchar-1;
+        else if(y < 0) y = 0;
+
+        if(x >= terminal.wchar) x = terminal.wchar-1;
+        else if(x < 0) x = 0;
+
+        terminal.x = x;
+        terminal.y = y;
+        ntermDrawCursor();
         break;
     }
 }
