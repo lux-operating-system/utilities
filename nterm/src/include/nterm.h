@@ -54,3 +54,4 @@ void ntermPutc(char);
 void ntermPutcn(const char *, size_t);
 void parseEscape();
 void ntermRedrawLine(int);
+void ntermDrawCursor();

@@ -46,6 +46,48 @@ void parseCSI() {
         }
 
         break;
+    
+    case 'J':       // erase
+        if(seq[2] == '1') {
+            /* clear from beginning of screen to cursor position */
+            if(terminal.y) {
+                for(int i = 0; i < (terminal.lineSize / 4) * terminal.y; i++) {
+                    terminal.buffer[i] = terminal.bg;
+                }
+            }
+
+            if(terminal.x) {
+                int oldx = terminal.x;
+                int oldy = terminal.y;
+
+                terminal.x = 0;
+
+                for(int i = 0; i < terminal.x; i++)
+                    ntermPutc(' ');
+                
+                terminal.x = oldx;
+                terminal.y = oldy;
+            }
+
+            for(int i = 0; i < terminal.y; i++) {
+                ntermRedrawLine(i);
+            }
+
+            ntermDrawCursor();
+        } else if(seq[2] == '2') {
+            /* clear entire screen */
+            for(int i = 0; i < terminal.totalSize / 4; i++) {
+                terminal.buffer[i] = terminal.bg;
+            }
+
+            for(int i = 0; i < terminal.y; i++) {
+                ntermRedrawLine(i);
+            }
+
+            ntermDrawCursor();
+        }
+
+        break;
     }
 }
 
