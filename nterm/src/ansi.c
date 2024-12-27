@@ -74,7 +74,7 @@ void parseCSI() {
             }
 
             ntermDrawCursor();
-        } else if(seq[2] == '2') {
+        } else if(seq[2] == '2' || seq[2] == '3') {
             /* clear entire screen */
             for(int i = 0; i < terminal.totalSize / 4; i++) {
                 terminal.buffer[i] = terminal.bg;
