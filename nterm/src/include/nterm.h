@@ -30,12 +30,9 @@ typedef struct {
     int lineSize;           // bytes
     int totalSize;          // bytes
     int cursor;             // cursor visibility
-    int echo;               // keypress echo
     uint32_t bg, fg;
 
-    int cbreak;             // input buffering mode, default is 0 (nocbreak)
     int escaping;           // 1 if parsing escape sequence
-
     uint8_t escape[256];    // escape sequence buffer
     int escapeLen;          // length of escape sequence
 

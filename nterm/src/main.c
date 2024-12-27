@@ -99,7 +99,6 @@ int main(int argc, char **argv) {
     terminal.lineSize = terminal.pitch * 16;
     terminal.totalSize = terminal.pitch * terminal.height;
     terminal.cursor = 1;
-    terminal.echo = 1;
     terminal.bg = ttyColors[0];
     terminal.fg = ttyColors[7];
     terminal.keyCount = 0;
@@ -162,7 +161,7 @@ int main(int argc, char **argv) {
 
                 if(!(terminal.scancodes[i] & 0x8000) && (terminal.scancodes[i] < DEFAULT_SCANCODES)) {
                     terminal.printableKeys[terminal.keyCount] = scancodeLookup[terminal.scancodes[i]];
-                    if(terminal.echo && terminal.printableKeys[terminal.keyCount]) {
+                    if(terminal.printableKeys[terminal.keyCount]) {
                         if(control) {
                             /* signals */
                             char c = terminal.printableKeys[terminal.keyCount];
@@ -170,35 +169,19 @@ int main(int argc, char **argv) {
                                 /* send SIGINT to all children processes */
                                 kill(-1*pid, SIGINT);
                             }
-                        } else if(terminal.printableKeys[terminal.keyCount] != '\b')
-                            ntermPutc(terminal.printableKeys[terminal.keyCount]);
-                        else if(terminal.keyCount)
-                            ntermPutc('\b');
+                        }
                     }
 
                     if(!control) {
-                        // handling for enter
-                        if(terminal.printableKeys[terminal.keyCount] == '\n') ret = 1;
-
-                        // handling for backspace if not in cbreak mode
-                        if(terminal.printableKeys[terminal.keyCount] == '\b') {
-                            if((!terminal.cbreak) && (terminal.keyCount > 0)) {
-                                terminal.keyCount--;
-                                terminal.printableKeys[terminal.keyCount] = 0;
-                            }
-                        } else {
-                            terminal.keyCount++;
-                        }
+                        terminal.keyCount++;
                     }
                 }
             }
 
             // send the key presses to the terminal if we're in cbreak mode OR
             // if the user pressed enter
-            if(terminal.cbreak || ret) {
-                write(master, terminal.printableKeys, terminal.keyCount);
-                terminal.keyCount = 0;
-            }
+            write(master, terminal.printableKeys, terminal.keyCount);
+            terminal.keyCount = 0;
         }
 
         // read from the terminal to draw on the screen
