@@ -19,6 +19,8 @@ all:
 	@make -C libctests
 	@echo "\x1B[0;1;35m make\x1B[0m utilities/head"
 	@make -C head
+	@echo "\x1B[0;1;35m make\x1B[0m utilities/reset"
+	@make -C reset
 
 install:
 	@mkdir -p out
@@ -42,6 +44,8 @@ install:
 	@make install -C libctests
 	@echo "\x1B[0;1;35m make\x1B[0m install utilities/head"
 	@make install -C head
+	@echo "\x1B[0;1;35m make\x1B[0m install utilities/reset"
+	@make install -C reset
 
 clean:
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/hello"
@@ -64,3 +68,5 @@ clean:
 	@make clean -C libctests
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/head"
 	@make clean -C head
+	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/reset"
+	@make clean -C reset
