@@ -106,14 +106,46 @@ void parseCSI() {
             else x = atoi(token) - 1;
         }
 
-        if(y >= terminal.hchar) y = terminal.hchar-1;
+        if(y >= terminal.hchar-1) y = terminal.hchar-1;
         else if(y < 0) y = 0;
 
-        if(x >= terminal.wchar) x = terminal.wchar-1;
+        if(x >= terminal.wchar-1) x = terminal.wchar-1;
         else if(x < 0) x = 0;
 
         terminal.x = x;
         terminal.y = y;
+        ntermDrawCursor();
+        break;
+    
+    case 'A':       // cursor up
+        if(!terminal.y) break;
+
+        ntermEraseCursor();
+        terminal.y--;
+        ntermDrawCursor();
+        break;
+    
+    case 'B':       // cursor down
+        if(terminal.y >= terminal.hchar-1) break;
+
+        ntermEraseCursor();
+        terminal.y++;
+        ntermDrawCursor();
+        break;
+    
+    case 'C':       // cursor forward
+        if(terminal.x >= terminal.wchar-1) break;
+
+        ntermEraseCursor();
+        terminal.x++;
+        ntermDrawCursor();
+        break;
+    
+    case 'D':       // cursor backward
+        if(!terminal.x) break;
+
+        ntermEraseCursor();
+        terminal.x--;
         ntermDrawCursor();
         break;
     }
