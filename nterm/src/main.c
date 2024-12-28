@@ -168,17 +168,14 @@ int main(int argc, char **argv) {
                                 /* send SIGINT to all children processes */
                                 kill(-1*pid, SIGINT);
                             }
+                        } else {
+                            terminal.keyCount++;
                         }
-                    }
-
-                    if(!control) {
-                        terminal.keyCount++;
                     }
                 }
             }
 
-            // send the key presses to the terminal if we're in cbreak mode OR
-            // if the user pressed enter
+            // send the key presses to the children processes on this terminal
             write(terminal.master, terminal.printableKeys, terminal.keyCount);
             terminal.keyCount = 0;
         }
