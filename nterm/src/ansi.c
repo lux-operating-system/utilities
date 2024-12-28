@@ -162,6 +162,30 @@ void parseCSI() {
         ntermDrawCursor();
         break;
     
+    case 'E':       // cursor next line
+        int next;
+        if(seq[2] >= '0' && seq[2] <= '9') next = atoi(&seq[2]);
+        else next = 1;
+
+        ntermEraseCursor();
+        terminal.x = 0;
+        terminal.y += next;
+        if(terminal.y >= terminal.hchar) terminal.y = terminal.hchar-1;
+        ntermDrawCursor();
+        break;
+    
+    case 'F':       // cursor previous line
+        int prev;
+        if(seq[2] >= '0' && seq[2] <= '9') prev = atoi(&seq[2]);
+        else prev = 1;
+
+        ntermEraseCursor();
+        terminal.x = 0;
+        terminal.y -= prev;
+        if(terminal.y < 0) terminal.y = 0;
+        ntermDrawCursor();
+        break;
+    
     case 'n':       // report cursor position
         if(seq[2] != '6') break;
 
