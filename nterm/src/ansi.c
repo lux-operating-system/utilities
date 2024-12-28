@@ -119,34 +119,46 @@ void parseCSI() {
         break;
     
     case 'A':       // cursor up
-        if(!terminal.y) break;
+        int up;
+        if(seq[2] >= '0' && seq[2] <= '9') up = atoi(&seq[2]);
+        else up = 1;
 
         ntermEraseCursor();
-        terminal.y--;
+        terminal.y -= up;
+        if(terminal.y < 0) terminal.y = 0;
         ntermDrawCursor();
         break;
     
     case 'B':       // cursor down
-        if(terminal.y >= terminal.hchar-1) break;
+        int down;
+        if(seq[2] >= '0' && seq[2] <= '9') down = atoi(&seq[2]);
+        else down = 1;
 
         ntermEraseCursor();
-        terminal.y++;
+        terminal.y += down;
+        if(terminal.y >= terminal.hchar) terminal.y = terminal.hchar-1;
         ntermDrawCursor();
         break;
     
     case 'C':       // cursor forward
-        if(terminal.x >= terminal.wchar-1) break;
+        int right;
+        if(seq[2] >= '0' && seq[2] <= '9') right = atoi(&seq[2]);
+        else right = 1;
 
         ntermEraseCursor();
-        terminal.x++;
+        terminal.x += right;
+        if(terminal.x >= terminal.wchar) terminal.x = terminal.wchar-1;
         ntermDrawCursor();
         break;
     
     case 'D':       // cursor backward
-        if(!terminal.x) break;
+        int left;
+        if(seq[2] >= '0' && seq[2] <= '9') left = atoi(&seq[2]);
+        else left = 1;
 
         ntermEraseCursor();
-        terminal.x--;
+        terminal.x -= left;
+        if(terminal.x < 0) terminal.x = 0;
         ntermDrawCursor();
         break;
     
