@@ -70,13 +70,13 @@ int main(int argc, char **argv) {
     // start by creating a terminal
     memset(&terminal, 0, sizeof(TerminalStatus));
 
-    int master = posix_openpt(O_RDWR | O_NONBLOCK | O_CLOEXEC);
-    if(master < 0) return -1;
+    terminal.master = posix_openpt(O_RDWR | O_NONBLOCK | O_CLOEXEC);
+    if(terminal.master < 0) return -1;
 
-    grantpt(master);
-    unlockpt(master);
+    grantpt(terminal.master);
+    unlockpt(terminal.master);
 
-    char *tempSlave = ptsname(master);
+    char *tempSlave = ptsname(terminal.master);
     if(!tempSlave) return -1;
     char *slaveName = malloc(strlen(tempSlave) + 1);
     if(!slaveName) return -1;
@@ -180,12 +180,12 @@ int main(int argc, char **argv) {
 
             // send the key presses to the terminal if we're in cbreak mode OR
             // if the user pressed enter
-            write(master, terminal.printableKeys, terminal.keyCount);
+            write(terminal.master, terminal.printableKeys, terminal.keyCount);
             terminal.keyCount = 0;
         }
 
         // read from the terminal to draw on the screen
-        s = read(master, terminal.slaveOutput, BUFFER_SIZE);
+        s = read(terminal.master, terminal.slaveOutput, BUFFER_SIZE);
         if(s > 0 && s <= BUFFER_SIZE) {
             terminal.slaveCount = s;
             ntermPutcn((const char *)terminal.slaveOutput, terminal.slaveCount);

@@ -19,6 +19,7 @@
 #define BUFFER_SIZE             1024
 
 typedef struct {
+    int master;             // master file descriptor
     int width, height;      // pixels
     int wchar, hchar;       // characters
     int x, y;               // cursor position
