@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 void parseCSI() {
     char *seq = (char *) terminal.escape;
@@ -147,6 +148,14 @@ void parseCSI() {
         ntermEraseCursor();
         terminal.x--;
         ntermDrawCursor();
+        break;
+    
+    case 'n':       // report cursor position
+        if(seq[2] != '6') break;
+
+        char buffer[64];
+        sprintf(buffer, "\e[%d;%dR", terminal.y+1, terminal.x+1);
+        write(terminal.master, buffer, strlen(buffer));
         break;
     }
 }
