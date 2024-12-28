@@ -134,7 +134,6 @@ int main(int argc, char **argv) {
         ssize_t s = read(terminal.kbd, terminal.scancodes, BUFFER_SIZE*2);
         if(s >= 2 && s <= BUFFER_SIZE) {
             size_t events = s/2;
-            int ret = 0;        // return key press
 
             // only save the key presses, not the key ups
             char *scancodeLookup;
