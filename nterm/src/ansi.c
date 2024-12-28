@@ -14,11 +14,33 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+void parseVT220() {
+    char *seq = (char *) terminal.escape;
+    int n;
+
+    switch(seq[terminal.escapeLen-1]) {
+    case 'h':       // enable cursor/focus
+        n = atoi((const char *) seq+3);
+        if(n == 25) terminal.cursor = 1;
+        break;
+
+    case 'l':       // disable cursor/focus
+        n = atoi((const char *) seq+3);
+        if(n == 25) terminal.cursor = 0;
+        break;
+    }
+}
+
 void parseCSI() {
     char *seq = (char *) terminal.escape;
     char *token;
 
     int n;
+
+    if(seq[2] == '?') {
+        parseVT220();
+        return;
+    }
 
     switch(seq[terminal.escapeLen-1]) {
     case 'm':       // set rendering attributes
@@ -196,26 +218,8 @@ void parseCSI() {
     }
 }
 
-void parseVT220() {
-    uint8_t *seq = (uint8_t *) terminal.escape;
-    int n;
-
-    switch(seq[terminal.escapeLen-1]) {
-    case 'h':       // enable cursor/focus
-        n = atoi((const char *) seq+2);
-        if(n == 25) terminal.cursor = 1;
-        break;
-
-    case 'l':       // disable cursor/focus
-        n = atoi((const char *) seq+2);
-        if(n == 25) terminal.cursor = 0;
-        break;
-    }
-}
-
 void parseEscape() {
     switch(terminal.escape[1]) {
     case '[': return parseCSI();
-    case '?': return parseVT220();
     }
 }
