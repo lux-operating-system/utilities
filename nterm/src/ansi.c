@@ -112,7 +112,8 @@ void parseCSI() {
 
         break;
     
-    case 'H':       // move cursor
+    case 'H':       // move cursor absolute
+    case 'f':       // move cursor effector
         seq += 2;
         int x = 0, y = 0;
         ntermEraseCursor();
