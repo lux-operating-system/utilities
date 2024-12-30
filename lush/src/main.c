@@ -122,6 +122,7 @@ int main() {
 
     for(;;) {
         printf("\e[0;96m%s \e[0;9%cm%c\e[0m ", getwd(wd), promptColor, uid ? '$' : '#');
+        fflush(stdout);
         if(line) free(line);
 
         line = NULL;
