@@ -21,6 +21,8 @@ all:
 	@make -C head
 	@echo "\x1B[0;1;35m make\x1B[0m utilities/reset"
 	@make -C reset
+	@echo "\x1B[0;1;35m make\x1B[0m utilities/chmod"
+	@make -C chmod
 
 install:
 	@mkdir -p out
@@ -46,6 +48,8 @@ install:
 	@make install -C head
 	@echo "\x1B[0;1;35m make\x1B[0m install utilities/reset"
 	@make install -C reset
+	@echo "\x1B[0;1;35m make\x1B[0m install utilities/chmod"
+	@make install -C chmod
 
 clean:
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/hello"
@@ -70,3 +74,5 @@ clean:
 	@make clean -C head
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/reset"
 	@make clean -C reset
+	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/chmod"
+	@make clean -C chmod
