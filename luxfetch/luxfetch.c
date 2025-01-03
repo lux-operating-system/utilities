@@ -19,16 +19,17 @@
 #define LFB_GET_WIDTH           (0x10 | IOCTL_OUT_PARAM)
 #define LFB_GET_HEIGHT          (0x20 | IOCTL_OUT_PARAM)
 
-char colors[73];
+char colors[77];
 
 char *colorTest(int bright) {
-    memset(colors, 0, 73);
+    memset(colors, 0, 77);
 
     for(int i = 0; i < 8; i++) {
         if(bright) sprintf(colors+strlen(colors), "\e[10%dm   ", i);
         else sprintf(colors+strlen(colors), "\e[4%dm   ", i);
     }
 
+    sprintf(colors+strlen(colors), "\e[0m");
     return colors;
 }
 
