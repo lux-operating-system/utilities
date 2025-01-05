@@ -121,7 +121,7 @@ int main() {
     char promptColor = '2';     // green by default
 
     for(;;) {
-        printf("\e[0;96m%s \e[0;9%cm%c\e[0m ", getwd(wd), promptColor, uid ? '$' : '#');
+        printf("\e[0;96m%s \e[0;9%cm%c\e[97m ", getwd(wd), promptColor, uid ? '$' : '#');
         fflush(stdout);
         if(line) free(line);
 
@@ -130,6 +130,8 @@ int main() {
 
         getline(&line, &lineSize, stdin);
         if(!line || !strlen(line)) continue;
+        printf("\e[0m");
+        fflush(stdout);
         if(execute(line)) promptColor = '1';    // red on error
         else promptColor = '2';     // green by default
     }
