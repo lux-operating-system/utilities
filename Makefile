@@ -23,6 +23,8 @@ all:
 	@make -C reset
 	@echo "\x1B[0;1;35m make\x1B[0m utilities/chmod"
 	@make -C chmod
+	@echo "\x1B[0;1;35m make\x1B[0m utilities/touch"
+	@make -C touch
 
 install:
 	@mkdir -p out
@@ -50,6 +52,8 @@ install:
 	@make install -C reset
 	@echo "\x1B[0;1;35m make\x1B[0m install utilities/chmod"
 	@make install -C chmod
+	@echo "\x1B[0;1;35m make\x1B[0m install utilities/touch"
+	@make install -C touch
 
 clean:
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/hello"
@@ -76,3 +80,5 @@ clean:
 	@make clean -C reset
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/chmod"
 	@make clean -C chmod
+	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/touch"
+	@make clean -C touch
