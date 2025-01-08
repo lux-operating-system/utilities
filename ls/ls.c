@@ -21,7 +21,7 @@ int statDump(char *name, char *path, struct stat *st) {
 
     char color[8];
     char reset[] = "\e[0m";
-    char buffer[PATH_MAX];
+    char buffer[PATH_MAX*2];
 
     if(S_ISCHR(st->st_mode))
         sprintf(color, "\e[0;93m");
@@ -75,7 +75,10 @@ int statDump(char *name, char *path, struct stat *st) {
         if(st->st_mode & S_IXOTH) sprintf(buffer+strlen(buffer), "x");
         else sprintf(buffer+strlen(buffer), "-");
 
-        sprintf(buffer+strlen(buffer), "  ");
+        sprintf(buffer+strlen(buffer), " ");
+
+        // number of links
+        sprintf(buffer+strlen(buffer), "%2ld  ", st->st_nlink);
 
         // owner and group UIDs
         if(!st->st_uid) sprintf(buffer+strlen(buffer), "root  ");
@@ -87,19 +90,31 @@ int statDump(char *name, char *path, struct stat *st) {
         if(h) {
             // human-readable sizes (MB, GB, etc)
             if(st->st_size >= 0x40000000)
-                sprintf(buffer+strlen(buffer), "%6dG  ", st->st_size / 0x40000000);
+                sprintf(buffer+strlen(buffer), "%8ldG  ", st->st_size / 0x40000000);
             else if(st->st_size >= 0x100000)
-                sprintf(buffer+strlen(buffer), "%6dM  ", st->st_size / 0x100000);
+                sprintf(buffer+strlen(buffer), "%8ldM  ", st->st_size / 0x100000);
             else if(st->st_size > 4096)
-                sprintf(buffer+strlen(buffer), "%6dk  ", st->st_size / 1024);
+                sprintf(buffer+strlen(buffer), "%8ldk  ", st->st_size / 1024);
             else
-                sprintf(buffer+strlen(buffer), "%7d  ", st->st_size);
+                sprintf(buffer+strlen(buffer), "%9ld  ", st->st_size);
         } else {
             // default sizes (bytes)
-            sprintf(buffer+strlen(buffer), "%9d  ", st->st_size);
+            sprintf(buffer+strlen(buffer), "%9ld  ", st->st_size);
         }
 
-        sprintf(buffer+strlen(buffer), "%s%s%s\n", color, path, reset);
+        if(!S_ISLNK(st->st_mode)) {
+            sprintf(buffer+strlen(buffer), "%s%s%s\n", color, path, reset);
+        } else {
+            char linkTarget[PATH_MAX+1];
+            ssize_t s = readlink(path, linkTarget, PATH_MAX);
+            if(s < 0) {
+                fprintf(stderr, "%s: could not read link %s\n", name, path);
+                return 1;
+            }
+            linkTarget[s] = 0;
+            sprintf(buffer+strlen(buffer), "%s%s%s -> %s\n", color, path, reset, linkTarget);
+        }
+
         printf("%s", buffer);
     } else {
         // undetailed
@@ -123,7 +138,7 @@ int dir(char *name, char *parent) {
 
     while((entry = readdir(dir))) {
         sprintf(buffer, "%s/%s", parent, entry->d_name);
-        if(stat(buffer, &st)) {
+        if(lstat(buffer, &st)) {
             fprintf(stderr, "%s: could not stat %s\n", name, buffer);
             errors++;
         } else {
@@ -138,13 +153,12 @@ int dir(char *name, char *parent) {
 int ls(char *name, char *path) {
     // determine if this is a file or directory
     struct stat st;
-    if(stat(path, &st)) {
+    if(lstat(path, &st)) {
         fprintf(stderr, "%s: could not stat %s\n", name, path);
         return 1;
     }
 
     if(S_ISDIR(st.st_mode)) return dir(name, path);
-
     return statDump(name, path, &st);
 }
 
