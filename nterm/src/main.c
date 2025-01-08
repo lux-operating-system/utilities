@@ -126,13 +126,17 @@ int main(int argc, char **argv) {
     if(!pid) return child(slaveName, terminal.kbd, argc, argv);
 
     int shift = 0, control = 0;
+    int busy;
 
     // idle loop where we read from the keyboard and write to the master pty,
     // and then read from the master pty and draw to the screen
     for(;;) {
+        busy = 0;
+
         // read from the keyboard
         ssize_t s = read(terminal.kbd, terminal.scancodes, BUFFER_SIZE*2);
         if(s >= 2 && s <= BUFFER_SIZE) {
+            busy = 1;
             size_t events = s/2;
 
             // only save the key presses, not the key ups
@@ -183,8 +187,11 @@ int main(int argc, char **argv) {
         // read from the terminal to draw on the screen
         s = read(terminal.master, terminal.slaveOutput, BUFFER_SIZE);
         if(s > 0 && s <= BUFFER_SIZE) {
+            busy = 1;
             terminal.slaveCount = s;
             ntermPutcn((const char *)terminal.slaveOutput, terminal.slaveCount);
         }
+
+        if(!busy) sched_yield();
     }
 }
