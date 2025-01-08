@@ -96,7 +96,7 @@ int statDump(char *name, char *path, struct stat *st) {
             else if(st->st_size >= 1024)
                 sprintf(buffer+strlen(buffer), "%8ldK  ", st->st_size / 1024);
             else
-                sprintf(buffer+strlen(buffer), "%8ldB ", st->st_size);
+                sprintf(buffer+strlen(buffer), "%8ldB  ", st->st_size);
         } else {
             // default sizes (bytes)
             sprintf(buffer+strlen(buffer), "%9ld  ", st->st_size);
