@@ -10,6 +10,25 @@
 #include <unistd.h>
 #include <string.h>
 
+const uint32_t ttyColors[] = {
+    0x1F1F1F,       // black
+    0x990000,       // red
+    0x00A600,       // green
+    0x999900,       // yellow
+    0x0000B2,       // blue
+    0xB200B2,       // magenta
+    0x00A6B2,       // cyan
+    0xBFBFBF,       // white
+    0x666666,       // gray
+    0xE60000,       // bright red
+    0x00D900,       // bright green
+    0xE6E600,       // bright yellow
+    0x0000FF,       // bright blue
+    0xE600E6,       // bright magenta
+    0x00E6E6,       // bright cyan
+    0xF6F6F6        // bright white
+};
+
 /* ntermRedrawLine(): redraws one horizontal line
  * params: l - line to redraw
  * returns: nothing
