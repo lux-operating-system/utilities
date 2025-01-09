@@ -10,11 +10,16 @@
 #include <string.h>
 #include <stdio.h>
 #include <dirent.h>
+#include <time.h>
 #include <sys/stat.h>
 
 int h = 0, l = 0, a = 0;
-
 char cwdbuf[PATH_MAX];
+struct tm now;
+char *months[] = {
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+};
 
 int statDump(char *name, char *path, struct stat *st) {
     if(!a && path[0] == '.') return 0;
@@ -90,16 +95,27 @@ int statDump(char *name, char *path, struct stat *st) {
         if(h) {
             // human-readable sizes (MB, GB, etc)
             if(st->st_size >= 0x40000000)
-                sprintf(buffer+strlen(buffer), "%8ldG  ", st->st_size / 0x40000000);
+                sprintf(buffer+strlen(buffer), "%7ldG ", st->st_size / 0x40000000);
             else if(st->st_size >= 0x100000)
-                sprintf(buffer+strlen(buffer), "%8ldM  ", st->st_size / 0x100000);
+                sprintf(buffer+strlen(buffer), "%7ldM ", st->st_size / 0x100000);
             else if(st->st_size >= 1024)
-                sprintf(buffer+strlen(buffer), "%8ldK  ", st->st_size / 1024);
+                sprintf(buffer+strlen(buffer), "%7ldK ", st->st_size / 1024);
             else
-                sprintf(buffer+strlen(buffer), "%8ldB  ", st->st_size);
+                sprintf(buffer+strlen(buffer), "%7ldB ", st->st_size);
         } else {
             // default sizes (bytes)
-            sprintf(buffer+strlen(buffer), "%9ld  ", st->st_size);
+            sprintf(buffer+strlen(buffer), "%8ld ", st->st_size);
+        }
+
+        // timestamp
+        struct tm ts;
+        gmtime_r(&st->st_mtime, &ts);
+        sprintf(buffer+strlen(buffer), "%s %2d ", months[ts.tm_mon], ts.tm_mday);
+
+        if(ts.tm_year == now.tm_year) {
+            sprintf(buffer+strlen(buffer), "%02d:%02d ", ts.tm_hour, ts.tm_min);
+        } else {
+            sprintf(buffer+strlen(buffer), " %04d ", ts.tm_year+1900);
         }
 
         if(!S_ISLNK(st->st_mode)) {
@@ -176,6 +192,9 @@ int main(int argc, char **argv) {
             return -1;
         }
     }
+
+    time_t t = time(NULL);
+    gmtime_r(&t, &now);
 
     int retval = 0;
 
