@@ -25,6 +25,8 @@ all:
 	@make -C chmod
 	@echo "\x1B[0;1;35m make\x1B[0m utilities/touch"
 	@make -C touch
+	@echo "\x1B[0;1;35m make\x1B[0m utilities/rm"
+	@make -C rm
 
 install:
 	@mkdir -p out
@@ -54,6 +56,8 @@ install:
 	@make install -C chmod
 	@echo "\x1B[0;1;35m make\x1B[0m install utilities/touch"
 	@make install -C touch
+	@echo "\x1B[0;1;35m make\x1B[0m install utilities/rm"
+	@make install -C rm
 
 clean:
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/hello"
@@ -82,3 +86,5 @@ clean:
 	@make clean -C chmod
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/touch"
 	@make clean -C touch
+	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/rm"
+	@make clean -C rm
