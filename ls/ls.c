@@ -83,7 +83,7 @@ int statDump(char *name, char *path, struct stat *st) {
         sprintf(buffer+strlen(buffer), " ");
 
         // number of links
-        sprintf(buffer+strlen(buffer), "%2ld  ", st->st_nlink);
+        sprintf(buffer+strlen(buffer), "%3ld ", st->st_nlink);
 
         // owner and group UIDs
         if(!st->st_uid) sprintf(buffer+strlen(buffer), "root  ");
@@ -94,14 +94,20 @@ int statDump(char *name, char *path, struct stat *st) {
 
         if(h) {
             // human-readable sizes (MB, GB, etc)
-            if(st->st_size >= 0x40000000)
-                sprintf(buffer+strlen(buffer), "%7ldG ", st->st_size / 0x40000000);
-            else if(st->st_size >= 0x100000)
-                sprintf(buffer+strlen(buffer), "%7ldM ", st->st_size / 0x100000);
-            else if(st->st_size >= 1024)
-                sprintf(buffer+strlen(buffer), "%7ldK ", st->st_size / 1024);
-            else
+            off_t fraction;
+
+            if(st->st_size >= 0x40000000) {
+                fraction = (st->st_size % 0x40000000) * 10 / 0x40000000;
+                sprintf(buffer+strlen(buffer), "%5ld.%01ldG ", st->st_size / 0x40000000, fraction);
+            } else if(st->st_size >= 0x100000) {
+                fraction = (st->st_size % 0x100000) * 10 / 0x100000;
+                sprintf(buffer+strlen(buffer), "%5ld.%01ldM ", st->st_size / 0x100000, fraction);
+            } else if(st->st_size >= 1024) {
+                fraction = (st->st_size % 1024) * 10 / 1024;
+                sprintf(buffer+strlen(buffer), "%5ld.%01ldK ", st->st_size / 1024, fraction);
+            } else {
                 sprintf(buffer+strlen(buffer), "%7ldB ", st->st_size);
+            }
         } else {
             // default sizes (bytes)
             sprintf(buffer+strlen(buffer), "%8ld ", st->st_size);
