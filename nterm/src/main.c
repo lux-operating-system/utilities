@@ -19,6 +19,8 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <signal.h>
+#include <termios.h>
+#include <errno.h>
 
 TerminalStatus terminal;
 
@@ -100,6 +102,22 @@ int main(int argc, char **argv) {
 
     for(int i = 0; i < terminal.hchar; i++)
         ntermRedrawLine(i);
+    
+    // let the pty driver know the terminal's size
+    struct winsize ws;
+    if(tcgetwinsize(terminal.master, &ws)) {
+        ntermPuts("failed to request terminal window size: ");
+        ntermPuts(strerror(errno));
+        for(;;);
+    }
+
+    ws.ws_col = terminal.wchar;
+    ws.ws_row = terminal.hchar;
+    if(tcsetwinsize(terminal.master, &ws)) {
+        ntermPuts("failed to set terminal window size: ");
+        ntermPuts(strerror(errno));
+        for(;;);
+    }
 
     // fork and spawn a test process
     pid_t pid = fork();
