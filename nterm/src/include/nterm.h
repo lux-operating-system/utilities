@@ -53,6 +53,7 @@ extern const uint32_t ttyColors[];
 
 void ntermPutc(char);
 void ntermPutcn(const char *, size_t);
+void ntermPuts(const char *);
 void parseEscape();
 void ntermRedrawLine(int);
 void ntermDrawCursor();

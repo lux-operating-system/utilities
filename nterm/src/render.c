@@ -211,3 +211,15 @@ void ntermPutcn(const char *s, size_t n) {
     for(size_t i = 0; i < n; i++)
         ntermPutc(s[i]);
 }
+
+/* ntermPuts(): renders a null-terminated string to the screen
+ * params: s - pointer to string
+ * returns: nothing
+ */
+
+void ntermPuts(const char *s) {
+    while(*s) {
+        ntermPutc(*s);
+        s++;
+    }
+}
