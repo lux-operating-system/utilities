@@ -167,11 +167,18 @@ int main(int argc, char **argv) {
                     terminal.printableKeys[terminal.keyCount] = scancodeLookup[terminal.scancodes[i]];
                     if(terminal.printableKeys[terminal.keyCount]) {
                         if(control) {
-                            /* signals */
-                            char c = terminal.printableKeys[terminal.keyCount];
-                            if(c == 'c' || c == 'C') {
-                                /* send SIGINT to all children processes */
-                                kill(-1*pid, SIGINT);
+                            /* control characters */
+                            char c = tolower(terminal.printableKeys[terminal.keyCount]);
+                            switch(c) {
+                            case 'c':   // Ctrl+C
+                                c = 0x03;   // end of text
+                                write(terminal.master, &c, 1);
+                                break;
+                            
+                            case 'd':   // Ctrl+D
+                                c = 0x04;   // end of transmission
+                                write(terminal.master, &c, 1);
+                                break;
                             }
                         } else {
                             terminal.keyCount++;
@@ -181,7 +188,10 @@ int main(int argc, char **argv) {
             }
 
             // send the key presses to the children processes on this terminal
-            write(terminal.master, terminal.printableKeys, terminal.keyCount);
+            if(terminal.keyCount) {
+                write(terminal.master, terminal.printableKeys, terminal.keyCount);
+            }
+            memset(terminal.printableKeys, 0, sizeof(terminal.printableKeys));
             terminal.keyCount = 0;
         }
 
