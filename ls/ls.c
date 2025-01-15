@@ -96,7 +96,10 @@ int statDump(char *name, char *path, struct stat *st) {
             // human-readable sizes (MB, GB, etc)
             off_t fraction;
 
-            if(st->st_size >= 0x40000000) {
+            if(st->st_size >= 0x10000000000) {
+                fraction = (st->st_size % 0x10000000000) * 10 / 0x10000000000;
+                sprintf(buffer+strlen(buffer), "%5ld.%01ldT ", st->st_size / 0x10000000000, fraction);
+            } else if(st->st_size >= 0x40000000) {
                 fraction = (st->st_size % 0x40000000) * 10 / 0x40000000;
                 sprintf(buffer+strlen(buffer), "%5ld.%01ldG ", st->st_size / 0x40000000, fraction);
             } else if(st->st_size >= 0x100000) {
