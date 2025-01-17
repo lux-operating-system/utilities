@@ -24,14 +24,14 @@
 
 TerminalStatus terminal;
 
-int child(char *slavepty, int maxfd, int argc, char **argv) {
+int child(char *secondarypty, int maxfd, int argc, char **argv) {
     if(maxfd) {
         for(int i = 0; i <= maxfd; i++) close(i);
     }
 
-    // open the slave pty for stdin, out, err
+    // open the secondary pty for stdin, out, err
     for(int i = 0; i < 3; i++) {
-        if(open(slavepty, O_RDWR) < 0) return -1;
+        if(open(secondarypty, O_RDWR) < 0) return -1;
     }
 
     tcsetpgrp(STDIN_FILENO, getpid());
@@ -55,17 +55,17 @@ int main(int argc, char **argv) {
     // start by creating a terminal
     memset(&terminal, 0, sizeof(TerminalStatus));
 
-    terminal.master = posix_openpt(O_RDWR | O_NONBLOCK | O_CLOEXEC);
-    if(terminal.master < 0) return -1;
+    terminal.primary = posix_openpt(O_RDWR | O_NONBLOCK | O_CLOEXEC);
+    if(terminal.primary < 0) return -1;
 
-    grantpt(terminal.master);
-    unlockpt(terminal.master);
+    grantpt(terminal.primary);
+    unlockpt(terminal.primary);
 
-    char *tempSlave = ptsname(terminal.master);
-    if(!tempSlave) return -1;
-    char *slaveName = malloc(strlen(tempSlave) + 1);
-    if(!slaveName) return -1;
-    strcpy(slaveName, tempSlave);
+    char *tempSecondary = ptsname(terminal.primary);
+    if(!tempSecondary) return -1;
+    char *secondaryName = malloc(strlen(tempSecondary) + 1);
+    if(!secondaryName) return -1;
+    strcpy(secondaryName, tempSecondary);
 
     // open the frame buffer and keyboard
     terminal.lfb = open("/dev/lfb0", O_RDWR | O_CLOEXEC);
@@ -86,8 +86,6 @@ int main(int argc, char **argv) {
     terminal.cursor = 1;
     terminal.bg = ttyColors[0];
     terminal.fg = ttyColors[7];
-    terminal.keyCount = 0;
-    terminal.slaveCount = 0;
 
     terminal.wchar = terminal.width / 8;
     terminal.hchar = terminal.height / 16;
@@ -107,7 +105,7 @@ int main(int argc, char **argv) {
     
     // let the pty driver know the terminal's size
     struct winsize ws;
-    if(tcgetwinsize(terminal.master, &ws)) {
+    if(tcgetwinsize(terminal.primary, &ws)) {
         ntermPuts("failed to request terminal window size: ");
         ntermPuts(strerror(errno));
         for(;;);
@@ -115,7 +113,7 @@ int main(int argc, char **argv) {
 
     ws.ws_col = terminal.wchar;
     ws.ws_row = terminal.hchar;
-    if(tcsetwinsize(terminal.master, &ws)) {
+    if(tcsetwinsize(terminal.primary, &ws)) {
         ntermPuts("failed to set terminal window size: ");
         ntermPuts(strerror(errno));
         for(;;);
@@ -124,13 +122,13 @@ int main(int argc, char **argv) {
     // fork and spawn a test process
     pid_t pid = fork();
     if(pid < 0) return -1;
-    if(!pid) return child(slaveName, terminal.kbd, argc, argv);
+    if(!pid) return child(secondaryName, terminal.kbd, argc, argv);
 
     int shift = 0, control = 0;
     int busy;
 
-    // idle loop where we read from the keyboard and write to the master pty,
-    // and then read from the master pty and draw to the screen
+    // idle loop where we read from the keyboard and write to the primary pty,
+    // and then read from the primary pty and draw to the screen
     for(;;) {
         busy = 0;
 
@@ -172,12 +170,12 @@ int main(int argc, char **argv) {
                             switch(c) {
                             case 'c':   // Ctrl+C
                                 c = 0x03;   // end of text
-                                write(terminal.master, &c, 1);
+                                write(terminal.primary, &c, 1);
                                 break;
                             
                             case 'd':   // Ctrl+D
                                 c = 0x04;   // end of transmission
-                                write(terminal.master, &c, 1);
+                                write(terminal.primary, &c, 1);
                                 break;
                             }
                         } else {
@@ -189,18 +187,18 @@ int main(int argc, char **argv) {
 
             // send the key presses to the children processes on this terminal
             if(terminal.keyCount) {
-                write(terminal.master, terminal.printableKeys, terminal.keyCount);
+                write(terminal.primary, terminal.printableKeys, terminal.keyCount);
             }
             memset(terminal.printableKeys, 0, sizeof(terminal.printableKeys));
             terminal.keyCount = 0;
         }
 
         // read from the terminal to draw on the screen
-        s = read(terminal.master, terminal.slaveOutput, BUFFER_SIZE);
+        s = read(terminal.primary, terminal.output, BUFFER_SIZE);
         if(s > 0 && s <= BUFFER_SIZE) {
             busy = 1;
-            terminal.slaveCount = s;
-            ntermPutcn((const char *)terminal.slaveOutput, terminal.slaveCount);
+            terminal.outputCount = s;
+            ntermPutcn((const char *)terminal.output, terminal.outputCount);
         }
 
         if(!busy) sched_yield();

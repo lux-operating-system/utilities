@@ -19,7 +19,7 @@
 #define BUFFER_SIZE             1024
 
 typedef struct {
-    int master;             // master file descriptor
+    int primary;            // primary terminal descriptor
     int width, height;      // pixels
     int wchar, hchar;       // characters
     int x, y;               // cursor position
@@ -41,8 +41,8 @@ typedef struct {
     uint16_t scancodes[BUFFER_SIZE];    // keyboard scan codes
     uint8_t printableKeys[BUFFER_SIZE]; // readable key presses
 
-    int slaveCount;
-    uint8_t slaveOutput[BUFFER_SIZE];   // output of the slave
+    int outputCount;
+    uint8_t output[BUFFER_SIZE];
 } TerminalStatus;
 
 extern TerminalStatus terminal;

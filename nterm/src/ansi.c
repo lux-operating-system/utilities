@@ -214,7 +214,7 @@ void parseCSI() {
 
         char buffer[64];
         sprintf(buffer, "\e[%d;%dR", terminal.y+1, terminal.x+1);
-        write(terminal.master, buffer, strlen(buffer));
+        write(terminal.primary, buffer, strlen(buffer));
         break;
     }
 }
