@@ -27,6 +27,8 @@ all:
 	@make -C touch
 	@echo "\x1B[0;1;35m make\x1B[0m utilities/rm"
 	@make -C rm
+	@echo "\x1B[0;1;35m make\x1B[0m utilities/ln"
+	@make -C ln
 
 install:
 	@mkdir -p out
@@ -58,6 +60,8 @@ install:
 	@make install -C touch
 	@echo "\x1B[0;1;35m make\x1B[0m install utilities/rm"
 	@make install -C rm
+	@echo "\x1B[0;1;35m make\x1B[0m install utilities/ln"
+	@make install -C ln
 
 clean:
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/hello"
@@ -88,3 +92,5 @@ clean:
 	@make clean -C touch
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/rm"
 	@make clean -C rm
+	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/ln"
+	@make clean -C ln
