@@ -34,8 +34,6 @@ int child(char *secondarypty, int maxfd, int argc, char **argv) {
         if(open(secondarypty, O_RDWR) < 0) return -1;
     }
 
-    tcsetpgrp(STDIN_FILENO, getpid());
-
     if(argc >= 2) {
         execvp(argv[1], &argv[1]);  // execute the second argument by default
         fprintf(stderr, "nterm: could not execute %s, trying lush...\n", argv[1]);
@@ -118,6 +116,12 @@ int main(int argc, char **argv) {
         ntermPuts(strerror(errno));
         for(;;);
     }
+
+    // set controlling terminal
+    tcsetpgrp(terminal.primary, getpid());
+    setpgrp();
+
+    setenv("TERM", "xterm-16color", 1);
 
     // fork and spawn a test process
     pid_t pid = fork();
