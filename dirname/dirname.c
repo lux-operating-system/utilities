@@ -23,12 +23,7 @@ int main(int argc, char **argv) {
         old = argv[i];
         memset(new, 0, PATH_MAX+1);
 
-        if((strlen(old) == 1) && (old[0] == '/')) {
-            new[0] = '/';
-            goto print;
-        }
-
-        if((strlen(old) == 2) && (old[0] == '/') && (old[1] == '/')) {
+        if(!strcmp(old, "/") || !strcmp(old, "//")) {
             new[0] = '/';
             goto print;
         }
