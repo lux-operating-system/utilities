@@ -29,6 +29,8 @@ all:
 	@make -C rm
 	@echo "\x1B[0;1;35m make\x1B[0m utilities/ln"
 	@make -C ln
+	@echo "\x1B[0;1;35m make\x1B[0m utilities/dirname"
+	@make -C dirname
 
 install:
 	@mkdir -p out
@@ -62,6 +64,8 @@ install:
 	@make install -C rm
 	@echo "\x1B[0;1;35m make\x1B[0m install utilities/ln"
 	@make install -C ln
+	@echo "\x1B[0;1;35m make\x1B[0m install utilities/dirname"
+	@make install -C dirname
 
 clean:
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/hello"
@@ -94,3 +98,5 @@ clean:
 	@make clean -C rm
 	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/ln"
 	@make clean -C ln
+	@echo "\x1B[0;1;35m make\x1B[0m clean utilities/dirname"
+	@make clean -C dirname
