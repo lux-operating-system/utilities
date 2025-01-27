@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 
 int h = 0, l = 0, a = 0;
+int terminal;           // whether stdout is a terminal
 char cwdbuf[PATH_MAX];
 struct tm now;
 char *months[] = {
@@ -28,18 +29,22 @@ int statDump(char *name, char *path, struct stat *st) {
     char reset[] = "\e[0m";
     char buffer[PATH_MAX*2];
 
-    if(S_ISCHR(st->st_mode))
-        sprintf(color, "\e[0;93m");
-    else if(S_ISDIR(st->st_mode))
-        sprintf(color, "\e[0;96m");
-    else if(S_ISBLK(st->st_mode))
-        sprintf(color, "\e[0;91m");
-    else if(S_ISLNK(st->st_mode))
-        sprintf(color, "\e[0;95m");
-    else if(st->st_mode & S_IXUSR || st->st_mode & S_IXGRP || st->st_mode & S_IXOTH)
-        sprintf(color, "\e[0;92m");
-    else
-        sprintf(color, "%s", reset);
+    if(terminal) {
+        if(S_ISCHR(st->st_mode))
+            sprintf(color, "\e[0;93m");
+        else if(S_ISDIR(st->st_mode))
+            sprintf(color, "\e[0;96m");
+        else if(S_ISBLK(st->st_mode))
+            sprintf(color, "\e[0;91m");
+        else if(S_ISLNK(st->st_mode))
+            sprintf(color, "\e[0;95m");
+        else if(st->st_mode & S_IXUSR || st->st_mode & S_IXGRP || st->st_mode & S_IXOTH)
+            sprintf(color, "\e[0;92m");
+        else
+            sprintf(color, "%s", reset);
+    } else {
+        color[0] = 0;
+    }
 
     if(l) {
         // detailed listing
@@ -202,6 +207,7 @@ int main(int argc, char **argv) {
         }
     }
 
+    terminal = isatty(fileno(stdout));
     time_t t = time(NULL);
     gmtime_r(&t, &now);
 
