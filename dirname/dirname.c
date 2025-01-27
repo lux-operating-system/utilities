@@ -16,12 +16,12 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    char new[PATH_MAX];
+    char new[PATH_MAX+1];
     const char *old;
 
     for(int i = 1; i < argc; i++) {
         old = argv[i];
-        memset(new, 0, PATH_MAX);
+        memset(new, 0, PATH_MAX+1);
 
         if((strlen(old) == 1) && (old[0] == '/')) {
             new[0] = '/';
@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
             goto print;
         }
 
-        strcpy(new, old);
+        strncpy(new, old, PATH_MAX);
 
         for(int j = strlen(new)-1; j >= 0; j--) {
             if(new[j] == '/') new[j] = 0;
